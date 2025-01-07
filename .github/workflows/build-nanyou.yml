@@ -56,11 +56,11 @@ jobs:
 
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}/webui-${{matrix.platform}}:${{ github.action_ref }}
+          tags: ghcr.io/${{ github.repository }}/webui-${{ env.PLATFORM_PAIR }}:${{ github.ref_name }}
 
       - name: Log out from GitHub Container Registry
         run: docker logout ghcr.io
