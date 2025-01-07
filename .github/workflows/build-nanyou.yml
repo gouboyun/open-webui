@@ -60,7 +60,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}/webui:nanyou
+          tags: ghcr.io/${{ github.repository }}/webui-${{matrix.platform}}:${{ github.action_ref }}
 
       - name: Log out from GitHub Container Registry
         run: docker logout ghcr.io
