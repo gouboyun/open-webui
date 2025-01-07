@@ -110,6 +110,7 @@ jobs:
 
   build-cuda-image:
     runs-on: ubuntu-latest
+    if: false
     permissions:
       contents: read
       packages: write
@@ -210,6 +211,7 @@ jobs:
 
   build-ollama-image:
     runs-on: ubuntu-latest
+    if: false
     permissions:
       contents: read
       packages: write
@@ -310,6 +312,7 @@ jobs:
 
   merge-main-images:
     runs-on: ubuntu-latest
+    if: false
     needs: [build-main-image]
     steps:
       # GitHub Packages requires the entire repository name to be in lowercase
