@@ -60,7 +60,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}-webui-${{ env.PLATFORM_PAIR }}:${{ github.ref_name }}
+          tags: ${{ env.FULL_IMAGE_NAME }}:${{ github.ref_name }}-${{ env.PLATFORM_PAIR }}
 
       - name: Log out from GitHub Container Registry
         run: docker logout ghcr.io
