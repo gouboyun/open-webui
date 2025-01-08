@@ -47,7 +47,7 @@ steps:
         path: /drone/src/node_modules
     commands:
       - npm config set registry https://registry.npmmirror.com
-      - npm install
+      - npm ci
       - npm run build
 
   - name: build-docker
