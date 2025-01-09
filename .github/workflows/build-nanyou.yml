@@ -61,7 +61,7 @@ jobs:
           context: .
           push: true
           file: Dockerfile-nanyou
-          tags: ${{ env.FULL_IMAGE_NAME }}:${{ github.ref_name }}-${{ env.PLATFORM_PAIR }}
+          tags: ${{ env.FULL_IMAGE_NAME }}:${{ github.ref_name }}-${{ env.PLATFORM_PAIR }}-slim
 
       - name: Log out from GitHub Container Registry
         run: docker logout ghcr.io
