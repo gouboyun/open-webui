@@ -10,7 +10,7 @@
 
 	import 'highlight.js/styles/github-dark.min.css';
 
-	import PyodideWorker from '$lib/workers/pyodide.worker?worker';
+	// import PyodideWorker from '$lib/workers/pyodide.worker?worker';
 	import CodeEditor from '$lib/components/common/CodeEditor.svelte';
 	import SvgPanZoom from '$lib/components/common/SVGPanZoom.svelte';
 
@@ -211,39 +211,39 @@
 
 		console.log(packages);
 
-		const pyodideWorker = new PyodideWorker();
+		// const pyodideWorker = new PyodideWorker();
 
-		pyodideWorker.postMessage({
-			id: id,
-			code: code,
-			packages: packages
-		});
+		// pyodideWorker.postMessage({
+		// 	id: id,
+		// 	code: code,
+		// 	packages: packages
+		// });
 
 		setTimeout(() => {
 			if (executing) {
 				executing = false;
 				stderr = 'Execution Time Limit Exceeded';
-				pyodideWorker.terminate();
+				// pyodideWorker.terminate();
 			}
 		}, 60000);
 
-		pyodideWorker.onmessage = (event) => {
-			console.log('pyodideWorker.onmessage', event);
-			const { id, ...data } = event.data;
+		// pyodideWorker.onmessage = (event) => {
+		// 	console.log('pyodideWorker.onmessage', event);
+		// 	const { id, ...data } = event.data;
 
-			console.log(id, data);
+		// 	console.log(id, data);
 
-			data['stdout'] && (stdout = data['stdout']);
-			data['stderr'] && (stderr = data['stderr']);
-			data['result'] && (result = data['result']);
+		// 	data['stdout'] && (stdout = data['stdout']);
+		// 	data['stderr'] && (stderr = data['stderr']);
+		// 	data['result'] && (result = data['result']);
 
-			executing = false;
-		};
+		// 	executing = false;
+		// };
 
-		pyodideWorker.onerror = (event) => {
-			console.log('pyodideWorker.onerror', event);
-			executing = false;
-		};
+		// pyodideWorker.onerror = (event) => {
+		// 	console.log('pyodideWorker.onerror', event);
+		// 	executing = false;
+		// };
 	};
 
 	let debounceTimeout;
