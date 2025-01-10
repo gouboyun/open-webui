@@ -6,12 +6,15 @@
 	import { createEventDispatcher, getContext, onDestroy, onMount } from 'svelte';
 	import { getFileById, getFileContentById } from '$lib/apis/files';
 
+	import Spinner from '$lib/components/common/Spinner.svelte';
+
 	const dispatch = createEventDispatcher();
 	let container: HTMLDivElement;
 	let RO: ResizeObserver;
 	let store: import('zustand/vanilla').StoreApi<PDFSlickState>;
 	let pdfSlick: PDFSlick;
 	let pdfInit = false;
+	let fileLoading = false;
 	let fileInfo: any = {};
 	$: {
 		if ($currentFileId && pdfInit) {
@@ -20,13 +23,22 @@
 	}
 
 	let fetchFile = async () => {
-		let res = await getFileById(localStorage.token, $currentFileId as unknown as string);
-		if (!res) return;
-		fileInfo = res;
-		res = await getFileContentById($currentFileId as unknown as string);
-		if (!res) return;
-		const url = URL.createObjectURL(res);
-		pdfSlick.loadDocument(url);
+		try {
+			fileLoading = true;
+			let res = await getFileById(localStorage.token, $currentFileId as unknown as string);
+			if (!res) return;
+			fileInfo = res;
+			res = await getFileContentById($currentFileId as unknown as string);
+			if (!res) return;
+			
+			setTimeout(() => {
+				const url = URL.createObjectURL(res);
+				pdfSlick.loadDocument(url);
+				fileLoading = false;
+			}, 500);
+		} catch (error) {
+			fileLoading = false;
+		} 
 	};
 
 	onMount(async () => {
@@ -135,7 +147,12 @@
 			</button>
 		</div>
 	</div>
-	<div class=" py-4 w-full flex flex-1">
+	<div class=" py-4 w-full flex flex-1 relative">
+		{#if fileLoading}
+		<div class="bg-[rgb(100,100,100,0.5)] z-[100] absolute top-0 left-0 w-full h-full flex items-center justify-center">
+			<Spinner className="size-10 text-blue-600"/>
+		</div>
+		{/if}
 		<div class="flex-1 relative h-full" id="container">
 			<div
 				id="viewerContainer"
