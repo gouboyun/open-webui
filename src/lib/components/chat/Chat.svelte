@@ -10,7 +10,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 
-	import { get, type Unsubscriber, type Writable } from 'svelte/store';
+	import { get, writable, type Unsubscriber, type Writable } from 'svelte/store';
 	import type { i18n as i18nType } from 'i18next';
 	import { WEBUI_BASE_URL } from '$lib/constants';
 
@@ -89,10 +89,14 @@
 	let controlPane;
 	let controlPaneComponent;
 
+	const controlPaneVariable = writable(null);
+	$: {
+		if(controlPane){
+			controlPaneVariable.set(controlPane)
+		}
+	}
+	setContext('controlPane',controlPaneVariable);
 
-	setContext('controlPane', {
-		getControlPane: () => controlPane,
-	});
 
 	let autoScroll = true;
 	let processing = '';

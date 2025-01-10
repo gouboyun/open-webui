@@ -44,9 +44,9 @@
 	import Image from '../common/Image.svelte';
 
 	const i18n = getContext('i18n');
-	const {getControlPane} = getContext('controlPane')
-	const controlPane = getControlPane()
-
+	const controlPaneVariable = getContext('controlPane') as any;
+	// 如果 controlPane 是一个 store，您可以直接订阅它
+	$: controlPane = $controlPaneVariable;
 
 	export let transparentBackground = false;
 
@@ -203,8 +203,11 @@
 				}
 				// 文件上传成功后，自动触发pdf文件内容预览
 				if (uploadedFile?.meta?.content_type === 'application/pdf') {
-					localStorage.chatControlsSize = 50
-					controlPane.resize(50);
+					if (controlPane) {
+						localStorage.chatControlsSize = 50;
+						controlPane.resize(50);
+					}
+
 					currentFileId.set(uploadedFile.id);
 					showControls.set(true);
 					showFileView.set(true);
