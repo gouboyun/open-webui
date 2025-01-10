@@ -3,7 +3,7 @@
 	import ArrowLeft from '../icons/ArrowLeft.svelte';
 	import { showControls, showOverview, currentFileId } from '$lib/stores';
 	import XMark from '../icons/XMark.svelte';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher, getContext, onMount } from 'svelte';
 	import { getFileContentById } from '$lib/apis/files';
 
 	const dispatch = createEventDispatcher();
@@ -12,7 +12,6 @@
 	let store: import('zustand/vanilla').StoreApi<PDFSlickState>;
 	let pdfSlick: PDFSlick;
 
-	let file = null;
 	$: {
 		if ($currentFileId && pdfSlick) {
 			fetchFile();
@@ -103,6 +102,7 @@
 			class="self-center pointer-events-auto p-1 rounded-full bg-white dark:bg-gray-850"
 			on:click={() => {
 				dispatch('close');
+				localStorage.chatControlsSize = 21
 				showControls.set(false);
 				showOverview.set(false);
 			}}

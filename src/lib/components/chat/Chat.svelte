@@ -4,7 +4,7 @@
 	import mermaid from 'mermaid';
 	import { PaneGroup, Pane, PaneResizer } from 'paneforge';
 
-	import { getContext, onDestroy, onMount, tick } from 'svelte';
+	import { getContext, onDestroy, onMount, setContext, tick } from 'svelte';
 	const i18n: Writable<i18nType> = getContext('i18n');
 
 	import { goto } from '$app/navigation';
@@ -88,6 +88,11 @@
 	const eventTarget = new EventTarget();
 	let controlPane;
 	let controlPaneComponent;
+
+
+	setContext('controlPane', {
+		getControlPane: () => controlPane,
+	});
 
 	let autoScroll = true;
 	let processing = '';

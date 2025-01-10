@@ -12,6 +12,7 @@
 	const i18n = getContext('i18n');
 	const dispatch = createEventDispatcher();
 
+
 	export let className = 'w-60';
 	export let colorClassName = 'bg-white dark:bg-gray-850 border border-gray-50 dark:border-white/5';
 	export let url: string | null = null;
@@ -28,6 +29,10 @@
 	export let size: number;
 
 	let showModal = false;
+
+	
+	const {getControlPane} = getContext('controlPane')
+	const controlPane = getControlPane()
 </script>
 
 {#if item}
@@ -43,6 +48,8 @@
 		
 
 		if(item?.file?.meta?.content_type === 'application/pdf'){
+			localStorage.chatControlsSize = 50
+			controlPane.resize(50);
 			currentFileId.set(item.id);
 			showControls.set(true);
 			showFileView.set(true);

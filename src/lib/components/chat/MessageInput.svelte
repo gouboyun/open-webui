@@ -44,6 +44,9 @@
 	import Image from '../common/Image.svelte';
 
 	const i18n = getContext('i18n');
+	const {getControlPane} = getContext('controlPane')
+	const controlPane = getControlPane()
+
 
 	export let transparentBackground = false;
 
@@ -200,6 +203,8 @@
 				}
 				// 文件上传成功后，自动触发pdf文件内容预览
 				if (uploadedFile?.meta?.content_type === 'application/pdf') {
+					localStorage.chatControlsSize = 50
+					controlPane.resize(50);
 					currentFileId.set(uploadedFile.id);
 					showControls.set(true);
 					showFileView.set(true);
