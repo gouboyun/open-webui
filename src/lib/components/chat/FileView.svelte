@@ -110,7 +110,7 @@
 			<XMark className="size-3.5 text-gray-900 dark:text-white" />
 		</button>
 	</div>
-	<div class=" h-full w-full bg-red-200 flex">
+	<div class=" h-full w-full flex">
 		<div class="flex-1 relative h-full" id="container">
 			<div
 				id="viewerContainer"
