@@ -48,6 +48,7 @@
 		
 
 		if(item?.file?.meta?.content_type === 'application/pdf'){
+			// 重置pdf 文件预览 pane 宽度
 			localStorage.chatControlsSize = 50
 			controlPane.resize(50);
 			currentFileId.set(item.id);
