@@ -3,7 +3,7 @@
 	import ArrowLeft from '../icons/ArrowLeft.svelte';
 	import { showControls, showOverview, currentFileId } from '$lib/stores';
 	import XMark from '../icons/XMark.svelte';
-	import { createEventDispatcher, getContext, onMount } from 'svelte';
+	import { createEventDispatcher, getContext, onDestroy, onMount } from 'svelte';
 	import { getFileContentById } from '$lib/apis/files';
 
 	const dispatch = createEventDispatcher();
@@ -11,9 +11,10 @@
 	let RO: ResizeObserver;
 	let store: import('zustand/vanilla').StoreApi<PDFSlickState>;
 	let pdfSlick: PDFSlick;
+	let pdfInit = false;
 
 	$: {
-		if ($currentFileId && pdfSlick) {
+		if ($currentFileId && pdfInit) {
 			fetchFile();
 		}
 	}
@@ -46,6 +47,7 @@
 				scaleValue: 'page-fit'
 			}
 		});
+		pdfInit = true;
 
 		// /**
 		//  * Load the PDF document
@@ -75,14 +77,23 @@
 		store.setState({ pdfSlick });
 	});
 
+	onDestroy(() => {
+		/**
+		 * Clean up
+		 */
+		RO?.unobserve(container);
+		pdfInit = false
+		// unsubscribe();
+	});
+
 	/**
 	 * start observing DOM container
 	 */
-	//  $: {
-	// 	if (RO && container) {
-	// 		RO.observe(container);
-	// 	}
-	// }
+	 $: {
+		if (RO && container) {
+			RO.observe(container);
+		}
+	}
 </script>
 
 <div class=" w-full h-full relative flex flex-col bg-gray-50 dark:bg-gray-850">
