@@ -61,7 +61,9 @@ jobs:
           context: .
           push: true
           file: Dockerfile-nanyou
-          tags: ${{ env.FULL_IMAGE_NAME }}:${{ github.ref_name }}-${{ env.PLATFORM_PAIR }}-slim
+          # tags: ${{ env.FULL_IMAGE_NAME }}:${{ github.ref_name }}-${{ env.PLATFORM_PAIR }}-slim
+          tags: registry.cn-wulanchabu.aliyuncs.com/gouboyun-pub/open-webui:${{ github.ref_name }}-${{ env.PLATFORM_PAIR }}-slim
+
 
       - name: Log out from GitHub Container Registry
         run: docker logout ghcr.io
