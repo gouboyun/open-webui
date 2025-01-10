@@ -1,6 +1,6 @@
 <script lang="ts">
 	import hljs from 'highlight.js';
-	import { loadPyodide } from 'pyodide';
+	// import { loadPyodide } from 'pyodide';
 	import mermaid from 'mermaid';
 
 	import { v4 as uuidv4 } from 'uuid';
@@ -108,88 +108,88 @@
 		return false;
 	};
 
-	const executePython = async (code) => {
-		if (!code.includes('input') && !code.includes('matplotlib')) {
-			executePythonAsWorker(code);
-		} else {
-			result = null;
-			stdout = null;
-			stderr = null;
+// 	const executePython = async (code) => {
+// 		if (!code.includes('input') && !code.includes('matplotlib')) {
+// 			executePythonAsWorker(code);
+// 		} else {
+// 			result = null;
+// 			stdout = null;
+// 			stderr = null;
 
-			executing = true;
+// 			executing = true;
 
-			document.pyodideMplTarget = document.getElementById(`plt-canvas-${id}`);
+// 			document.pyodideMplTarget = document.getElementById(`plt-canvas-${id}`);
 
-			let pyodide = await loadPyodide({
-				indexURL: '/pyodide/',
-				stdout: (text) => {
-					console.log('Python output:', text);
+// 			let pyodide = await loadPyodide({
+// 				indexURL: '/pyodide/',
+// 				stdout: (text) => {
+// 					console.log('Python output:', text);
 
-					if (stdout) {
-						stdout += `${text}\n`;
-					} else {
-						stdout = `${text}\n`;
-					}
-				},
-				stderr: (text) => {
-					console.log('An error occurred:', text);
-					if (stderr) {
-						stderr += `${text}\n`;
-					} else {
-						stderr = `${text}\n`;
-					}
-				},
-				packages: ['micropip']
-			});
+// 					if (stdout) {
+// 						stdout += `${text}\n`;
+// 					} else {
+// 						stdout = `${text}\n`;
+// 					}
+// 				},
+// 				stderr: (text) => {
+// 					console.log('An error occurred:', text);
+// 					if (stderr) {
+// 						stderr += `${text}\n`;
+// 					} else {
+// 						stderr = `${text}\n`;
+// 					}
+// 				},
+// 				packages: ['micropip']
+// 			});
 
-			try {
-				const micropip = pyodide.pyimport('micropip');
+// 			try {
+// 				const micropip = pyodide.pyimport('micropip');
 
-				// await micropip.set_index_urls('https://pypi.org/pypi/{package_name}/json');
+// 				// await micropip.set_index_urls('https://pypi.org/pypi/{package_name}/json');
 
-				let packages = [
-					code.includes('requests') ? 'requests' : null,
-					code.includes('bs4') ? 'beautifulsoup4' : null,
-					code.includes('numpy') ? 'numpy' : null,
-					code.includes('pandas') ? 'pandas' : null,
-					code.includes('matplotlib') ? 'matplotlib' : null,
-					code.includes('sklearn') ? 'scikit-learn' : null,
-					code.includes('scipy') ? 'scipy' : null,
-					code.includes('re') ? 'regex' : null,
-					code.includes('seaborn') ? 'seaborn' : null
-				].filter(Boolean);
+// 				let packages = [
+// 					code.includes('requests') ? 'requests' : null,
+// 					code.includes('bs4') ? 'beautifulsoup4' : null,
+// 					code.includes('numpy') ? 'numpy' : null,
+// 					code.includes('pandas') ? 'pandas' : null,
+// 					code.includes('matplotlib') ? 'matplotlib' : null,
+// 					code.includes('sklearn') ? 'scikit-learn' : null,
+// 					code.includes('scipy') ? 'scipy' : null,
+// 					code.includes('re') ? 'regex' : null,
+// 					code.includes('seaborn') ? 'seaborn' : null
+// 				].filter(Boolean);
 
-				console.log(packages);
-				await micropip.install(packages);
+// 				console.log(packages);
+// 				await micropip.install(packages);
 
-				result = await pyodide.runPythonAsync(`from js import prompt
-def input(p):
-    return prompt(p)
-__builtins__.input = input`);
+// 				result = await pyodide.runPythonAsync(`from js import prompt
+// def input(p):
+//     return prompt(p)
+// __builtins__.input = input`);
 
-				result = await pyodide.runPython(code);
+// 				result = await pyodide.runPython(code);
 
-				if (!result) {
-					result = '[NO OUTPUT]';
-				}
+// 				if (!result) {
+// 					result = '[NO OUTPUT]';
+// 				}
 
-				console.log(result);
-				console.log(stdout);
-				console.log(stderr);
+// 				console.log(result);
+// 				console.log(stdout);
+// 				console.log(stderr);
 
-				const pltCanvasElement = document.getElementById(`plt-canvas-${id}`);
+// 				const pltCanvasElement = document.getElementById(`plt-canvas-${id}`);
 
-				if (pltCanvasElement?.innerHTML !== '') {
-					pltCanvasElement.classList.add('pt-4');
-				}
-			} catch (error) {
-				console.error('Error:', error);
-				stderr = error;
-			}
+// 				if (pltCanvasElement?.innerHTML !== '') {
+// 					pltCanvasElement.classList.add('pt-4');
+// 				}
+// 			} catch (error) {
+// 				console.error('Error:', error);
+// 				stderr = error;
+// 			}
 
-			executing = false;
-		}
-	};
+// 			executing = false;
+// 		}
+// 	};
 
 	const executePythonAsWorker = async (code) => {
 		result = null;
@@ -326,14 +326,15 @@ __builtins__.input = input`);
 						{#if executing}
 							<div class="run-code-button bg-none border-none p-1 cursor-not-allowed">Running</div>
 						{:else if run}
-							<button
+							<!--python 代码运行 注释-->
+							<!-- <button
 								class="run-code-button bg-none border-none bg-gray-50 hover:bg-gray-100 dark:bg-gray-850 dark:hover:bg-gray-800 transition rounded-md px-1.5 py-0.5"
 								on:click={async () => {
 									code = _code;
 									await tick();
 									executePython(code);
 								}}>{$i18n.t('Run')}</button
-							>
+							> -->
 						{/if}
 					{/if}
 

@@ -16,7 +16,11 @@
 		showCallOverlay,
 		tools,
 		user as _user,
-		showControls
+		showControls,
+		showFileView,
+		showOverview,
+		showArtifacts,
+		currentFileId
 	} from '$lib/stores';
 
 	import { blobToFile, compressImage, createMessagesList, findWordIndices } from '$lib/utils';
@@ -193,6 +197,14 @@
 				if (uploadedFile.error) {
 					console.warn('File upload warning:', uploadedFile.error);
 					toast.warning(uploadedFile.error);
+				}
+				// 文件上传成功后，自动触发pdf文件内容预览
+				if (uploadedFile?.meta?.content_type === 'application/pdf') {
+					currentFileId.set(uploadedFile.id);
+					showControls.set(true);
+					showFileView.set(true);
+					showArtifacts.set(false);
+					showOverview.set(false);
 				}
 
 				fileItem.status = 'uploaded';

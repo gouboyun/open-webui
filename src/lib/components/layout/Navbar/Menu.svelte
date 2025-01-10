@@ -14,7 +14,10 @@
 		showControls,
 		showArtifacts,
 		mobile,
-		temporaryChatEnabled
+		temporaryChatEnabled,
+
+		showFileView
+
 	} from '$lib/stores';
 	import { flyAndScale } from '$lib/utils/transitions';
 
@@ -152,6 +155,7 @@
 						await showControls.set(true);
 						await showOverview.set(false);
 						await showArtifacts.set(false);
+						await showFileView.set(false);
 					}}
 				>
 					<AdjustmentsHorizontal className=" size-4" strokeWidth="0.5" />
@@ -189,6 +193,7 @@
 				on:click={async () => {
 					await showControls.set(true);
 					await showOverview.set(true);
+					await showFileView.set(false);
 					await showArtifacts.set(false);
 				}}
 			>
@@ -203,6 +208,7 @@
 					await showControls.set(true);
 					await showArtifacts.set(true);
 					await showOverview.set(false);
+					await showFileView.set(false);
 				}}
 			>
 				<Cube className=" size-4" strokeWidth="1.5" />

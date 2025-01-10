@@ -33,6 +33,7 @@
 
 	import '../tailwind.css';
 	import '../app.css';
+	import '@pdfslick/core/dist/pdf_viewer.css';
 
 	import 'tippy.js/dist/tippy.css';
 

@@ -64,6 +64,8 @@ export const showControls = writable(false);
 export const showOverview = writable(false);
 export const showArtifacts = writable(false);
 export const showCallOverlay = writable(false);
+export const showFileView = writable(false);
+export const currentFileId = writable(null);
 
 export const temporaryChatEnabled = writable(false);
 export const scrollPaginationEnabled = writable(false);

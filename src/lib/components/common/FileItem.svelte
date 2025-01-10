@@ -6,6 +6,8 @@
 	import GarbageBin from '../icons/GarbageBin.svelte';
 	import Spinner from './Spinner.svelte';
 	import Tooltip from './Tooltip.svelte';
+	import { getFileById, getFileContentById } from '$lib/apis/files';
+	import {showControls, showFileView ,showOverview,showArtifacts,currentFileId} from '$lib/stores';
 
 	const i18n = getContext('i18n');
 	const dispatch = createEventDispatcher();
@@ -38,6 +40,19 @@
 		: 'rounded-2xl'} text-left"
 	type="button"
 	on:click={async () => {
+		
+
+		if(item?.file?.meta?.content_type === 'application/pdf'){
+			currentFileId.set(item.id);
+			showControls.set(true);
+			showFileView.set(true);
+			showArtifacts.set(false);
+			showOverview.set(false);
+			// alert('pdf 处理');
+			// const res = await getFileContentById(item.id)
+			// debugger;
+			return;
+		}
 		if (item?.file?.data?.content) {
 			showModal = !showModal;
 		} else {

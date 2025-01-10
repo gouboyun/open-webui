@@ -4,13 +4,21 @@
 	import { Pane, PaneResizer } from 'paneforge';
 
 	import { onDestroy, onMount, tick } from 'svelte';
-	import { mobile, showControls, showCallOverlay, showOverview, showArtifacts } from '$lib/stores';
+	import {
+		mobile,
+		showControls,
+		showCallOverlay,
+		showOverview,
+		showArtifacts,
+		showFileView
+	} from '$lib/stores';
 
 	import Modal from '../common/Modal.svelte';
 	import Controls from './Controls/Controls.svelte';
 	import CallOverlay from './MessageInput/CallOverlay.svelte';
 	import Drawer from '../common/Drawer.svelte';
 	import Overview from './Overview.svelte';
+	import FileView from './FileView.svelte';
 	import EllipsisVertical from '../icons/EllipsisVertical.svelte';
 	import Artifacts from './Artifacts.svelte';
 	import { min } from '@floating-ui/utils';
@@ -227,6 +235,7 @@
 		>
 			{#if $showControls}
 				<div class="pr-4 pb-8 flex max-h-full min-h-full">
+					<!--pdf 模式下需要修改-->
 					<div
 						class="w-full {($showOverview || $showArtifacts) && !$showCallOverlay
 							? ' '
@@ -248,6 +257,8 @@
 							</div>
 						{:else if $showArtifacts}
 							<Artifacts {history} overlay={dragged} />
+						{:else if $showFileView}
+							<FileView />
 						{:else if $showOverview}
 							<Overview
 								{history}
