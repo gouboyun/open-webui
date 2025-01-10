@@ -9,6 +9,7 @@
 		settings,
 		showArchivedChats,
 		showControls,
+		showFileView,
 		showSidebar,
 		temporaryChatEnabled,
 		user
@@ -135,6 +136,7 @@
 						<button
 							class=" flex cursor-pointer px-2 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-850 transition"
 							on:click={async () => {
+								await showFileView.set(false);
 								await showControls.set(!$showControls);
 							}}
 							aria-label="Controls"

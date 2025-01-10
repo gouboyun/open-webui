@@ -10,7 +10,7 @@
 		showCallOverlay,
 		showOverview,
 		showArtifacts,
-		showFileView
+		showFileView,
 	} from '$lib/stores';
 
 	import Modal from '../common/Modal.svelte';
@@ -132,6 +132,7 @@
 		showControls.set(false);
 		showOverview.set(false);
 		showArtifacts.set(false);
+		showFileView.set(false);
 
 		if ($showCallOverlay) {
 			showCallOverlay.set(false);
@@ -153,7 +154,7 @@
 				}}
 			>
 				<div
-					class=" {$showCallOverlay || $showOverview || $showArtifacts
+					class=" {$showCallOverlay || $showOverview || $showArtifacts || $showFileView
 						? ' h-screen  w-screen'
 						: 'px-6 py-4'} h-full"
 				>
