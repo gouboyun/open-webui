@@ -8,7 +8,7 @@ on:
       - dev
 
 env:
-  REGISTRY: ghcr.io
+  REGISTRY: registry.cn-wulanchabu.aliyuncs.com # ghcr.io
 
 jobs:
   build-main-image:
@@ -51,8 +51,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.ALIYUN_DOCKER_USER }} # github.actor
+          password: ${{ secrets.ALIYUN_DOCKER_PSWD }} # ${{ secrets.GITHUB_TOKEN }}
 
 
       - name: Build and push Docker image
