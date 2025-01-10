@@ -7,11 +7,16 @@
 	import Spinner from './Spinner.svelte';
 	import Tooltip from './Tooltip.svelte';
 	import { getFileById, getFileContentById } from '$lib/apis/files';
-	import {showControls, showFileView ,showOverview,showArtifacts,currentFileId} from '$lib/stores';
+	import {
+		showControls,
+		showFileView,
+		showOverview,
+		showArtifacts,
+		currentFileId
+	} from '$lib/stores';
 
 	const i18n = getContext('i18n');
 	const dispatch = createEventDispatcher();
-
 
 	export let className = 'w-60';
 	export let colorClassName = 'bg-white dark:bg-gray-850 border border-gray-50 dark:border-white/5';
@@ -30,9 +35,9 @@
 
 	let showModal = false;
 
-	
-	const {getControlPane} = getContext('controlPane')
-	const controlPane = getControlPane()
+	const controlPaneVariable = getContext('controlPane') as any;
+	// 如果 controlPane 是一个 store，您可以直接订阅它
+	$: controlPane = $controlPaneVariable;
 </script>
 
 {#if item}
@@ -45,12 +50,12 @@
 		: 'rounded-2xl'} text-left"
 	type="button"
 	on:click={async () => {
-		
-
-		if(item?.file?.meta?.content_type === 'application/pdf'){
-			// 重置pdf 文件预览 pane 宽度
-			localStorage.chatControlsSize = 50
-			controlPane.resize(50);
+		if (item?.file?.meta?.content_type === 'application/pdf') {
+			// // 重置pdf 文件预览 pane 宽度
+			if (controlPane) {
+				localStorage.chatControlsSize = 50;
+				controlPane.resize(50);
+			}
 			currentFileId.set(item.id);
 			showControls.set(true);
 			showFileView.set(true);
