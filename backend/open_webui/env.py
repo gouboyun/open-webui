@@ -67,7 +67,9 @@ log_levels = ["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]
 
 GLOBAL_LOG_LEVEL = os.environ.get("GLOBAL_LOG_LEVEL", "").upper()
 if GLOBAL_LOG_LEVEL in log_levels:
-    logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL, force=True)
+    # force means replace old settings
+    fmt = '%(levelname)s-%(asctime)s %(message)s'
+    logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL, format=fmt, force=True)
 else:
     GLOBAL_LOG_LEVEL = "INFO"
 
