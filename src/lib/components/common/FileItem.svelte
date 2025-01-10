@@ -55,9 +55,6 @@
 			showFileView.set(true);
 			showArtifacts.set(false);
 			showOverview.set(false);
-			// alert('pdf 处理');
-			// const res = await getFileContentById(item.id)
-			// debugger;
 			return;
 		}
 		if (item?.file?.data?.content) {
