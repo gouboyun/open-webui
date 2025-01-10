@@ -4,7 +4,7 @@
 	import { showControls, showOverview, currentFileId } from '$lib/stores';
 	import XMark from '../icons/XMark.svelte';
 	import { createEventDispatcher, getContext, onDestroy, onMount } from 'svelte';
-	import { getFileContentById } from '$lib/apis/files';
+	import { getFileById, getFileContentById } from '$lib/apis/files';
 
 	const dispatch = createEventDispatcher();
 	let container: HTMLDivElement;
@@ -12,7 +12,7 @@
 	let store: import('zustand/vanilla').StoreApi<PDFSlickState>;
 	let pdfSlick: PDFSlick;
 	let pdfInit = false;
-
+	let fileInfo: any = {};
 	$: {
 		if ($currentFileId && pdfInit) {
 			fetchFile();
@@ -20,7 +20,10 @@
 	}
 
 	let fetchFile = async () => {
-		const res = await getFileContentById($currentFileId as unknown as string);
+		let res = await getFileById(localStorage.token, $currentFileId as unknown as string);
+		if (!res) return;
+		fileInfo = res;
+		res = await getFileContentById($currentFileId as unknown as string);
 		if (!res) return;
 		const url = URL.createObjectURL(res);
 		pdfSlick.loadDocument(url);
@@ -82,14 +85,14 @@
 		 * Clean up
 		 */
 		RO?.unobserve(container);
-		pdfInit = false
+		pdfInit = false;
 		// unsubscribe();
 	});
 
 	/**
 	 * start observing DOM container
 	 */
-	 $: {
+	$: {
 		if (RO && container) {
 			RO.observe(container);
 		}
@@ -97,31 +100,42 @@
 </script>
 
 <div class=" w-full h-full relative flex flex-col bg-gray-50 dark:bg-gray-850">
-	<div class="w-full h-full flex-1 relative"></div>
-	<div class="absolute pointer-events-none z-50 w-full flex items-center justify-start p-4">
-		<button
-			class="self-center pointer-events-auto p-1 rounded-full bg-white dark:bg-gray-850"
-			on:click={() => {
-				showOverview.set(false);
-			}}
-		>
-			<ArrowLeft className="size-3.5  text-gray-900 dark:text-white" />
-		</button>
+	<div class="w-full flex justify-between items-center shadow bg-[#fefefe]">
+		<div class=" pointer-events-none z-50 flex items-center justify-start p-4">
+			<button
+				class="self-center pointer-events-auto p-1 rounded-full bg-white dark:bg-gray-850"
+				on:click={() => {
+					showOverview.set(false);
+				}}
+			>
+				<ArrowLeft className="size-3.5  text-gray-900 dark:text-white" />
+			</button>
+		</div>
+		{#if fileInfo?.filename}
+			<div
+				class=" flex-1
+				 text-center whitespace-nowrap text-ellipsis overflow-hidden dark:text-black"
+				title={fileInfo?.filename}
+			>
+				{fileInfo?.filename}
+			</div>
+		{/if}
+
+		<div class="  pointer-events-none z-50 flex items-center justify-end p-4">
+			<button
+				class="self-center pointer-events-auto p-1 rounded-full bg-white dark:bg-gray-850"
+				on:click={() => {
+					dispatch('close');
+					localStorage.chatControlsSize = 21;
+					showControls.set(false);
+					showOverview.set(false);
+				}}
+			>
+				<XMark className="size-3.5 text-gray-900 dark:text-white" />
+			</button>
+		</div>
 	</div>
-	<div class=" absolute pointer-events-none z-50 w-full flex items-center justify-end p-4">
-		<button
-			class="self-center pointer-events-auto p-1 rounded-full bg-white dark:bg-gray-850"
-			on:click={() => {
-				dispatch('close');
-				localStorage.chatControlsSize = 21
-				showControls.set(false);
-				showOverview.set(false);
-			}}
-		>
-			<XMark className="size-3.5 text-gray-900 dark:text-white" />
-		</button>
-	</div>
-	<div class=" h-full w-full flex">
+	<div class=" py-4 w-full flex flex-1">
 		<div class="flex-1 relative h-full" id="container">
 			<div
 				id="viewerContainer"
