@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
 	import { marked } from 'marked';
-
+	import Icon from '@iconify/svelte';
 	import { onMount, getContext, tick, createEventDispatcher } from 'svelte';
 	import { blur, fade } from 'svelte/transition';
+	import { goto } from '$app/navigation';
 
 	const dispatch = createEventDispatcher();
 
@@ -37,6 +38,36 @@
 	export let webSearchEnabled = false;
 
 	let models = [];
+
+	let entries = [
+		{
+			icon:'bx:chat',
+			title:'AI对话',
+			subTitle:'通用AI机器人对话工具',
+			link:''
+		},
+		{
+			icon:'proicons:toolbox',
+			title:'效率工具箱',
+			subTitle:'集成各种办公室辅助工具',
+			link:''
+		},
+		{
+			icon:'codicon:book',
+			title:'知识库',
+			subTitle:'训练本地专属AI知识库',
+			link:'/workspace/knowledge'
+		},
+		{
+			icon:'ph:files',
+			title:'Chat PDF',
+			subTitle:'PDF文档阅读与对话助手',
+			link:''
+		}
+	]
+	const toPage = (path)=>{
+		goto(path)
+	}
 
 	const selectSuggestionPrompt = async (p) => {
 		let text = p;
@@ -210,16 +241,32 @@
 			</div>
 		</div>
 	</div>
-	<div class="mx-auto max-w-2xl font-primary" in:fade={{ duration: 200, delay: 200 }}>
-		<div class="mx-5">
-			<Suggestions
+	<div class="mx-auto  font-primary" in:fade={{ duration: 200, delay: 200 }}>
+		<div class="mx-5 mt-4 flex">
+			{#each entries as entry}
+				<button class=" mr-2  cursor-pointer flex items-center border border-gray-100 hover:border-blue-300 p-4 rounded-md"
+				on:click={()=>{
+					toPage(entry.link)
+				}}
+				>
+					<Icon icon={entry.icon}  font-size={40} color={'#aaa'}/>
+					<div class=" flex flex-col items-start ml-4">
+						<div class="text-3xl sm:text-3xl line-clamp-1">{entry.title}</div>
+						<div class="text-[0.75rem] text-gray-500 font-primary">{entry.subTitle}</div>
+					</div>
+				</button>
+			{/each}
+			
+
+			
+			<!-- <Suggestions
 				suggestionPrompts={models[selectedModelIdx]?.info?.meta?.suggestion_prompts ??
 					$config?.default_prompt_suggestions ??
 					[]}
 				on:select={(e) => {
 					selectSuggestionPrompt(e.detail);
 				}}
-			/>
+			/> -->
 		</div>
 	</div>
 </div>

@@ -122,7 +122,6 @@
 				</div>
 			</div>
 		</div>
-
 		<div class=" w-full font-primary" in:fade={{ duration: 200, delay: 300 }}>
 			<Suggestions
 				className="grid grid-cols-2"
