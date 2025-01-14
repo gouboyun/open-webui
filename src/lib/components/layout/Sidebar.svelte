@@ -46,6 +46,7 @@
 	import ChatItem from './Sidebar/ChatItem.svelte';
 	import Spinner from '../common/Spinner.svelte';
 	import Loader from '../common/Loader.svelte';
+	import Pdf from './Sidebar/Pdf.svelte'
 	import AddFilesPlaceholder from '../AddFilesPlaceholder.svelte';
 	import SearchInput from './Sidebar/SearchInput.svelte';
 	import Folder from '../common/Folder.svelte';
@@ -671,7 +672,7 @@
 				</div>
 			</div>
 		{/if}
-		<div class=" flex-1 overflow-y-auto">
+		<div class=" flex-1 overflow-y-auto border-t pt-2 mt-2">
 			{#if pageType === 'chat'}
 			<div class="relative {$temporaryChatEnabled ? 'opacity-20' : ''}">
 				{#if $temporaryChatEnabled}
@@ -949,7 +950,10 @@
 					</div>
 				</Folder>
 			</div>
-		{/if}
+			{/if}
+			{#if pageType === 'pdf'}
+			<Pdf/>
+			{/if}
 		</div>
 		
 		<div class="px-2">
