@@ -6,7 +6,7 @@ ARG GID=0
 # nothing to do for frontend
 
 ######## WebUI backend ########
-FROM python:3.11-slim-bookworm AS base
+FROM registry.cn-wulanchabu.aliyuncs.com/gouboyun-pub/python:3.11-slim-bookworm AS base
 
 # Use args
 ARG USE_CUDA
