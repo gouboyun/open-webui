@@ -63,6 +63,12 @@
 			title:'Chat PDF',
 			subTitle:'PDF文档阅读与对话助手',
 			link:'/pdf'
+		},
+		{
+			icon:'ph:files',
+			title:'文档翻译',
+			subTitle:'文档翻译助手',
+			link:'/translation'
 		}
 	]
 	const toPage = (path)=>{
@@ -242,9 +248,9 @@
 		</div>
 	</div>
 	<div class="mx-auto  font-primary" in:fade={{ duration: 200, delay: 200 }}>
-		<div class="mx-5 mt-4 flex">
+		<div class="mx-5 mt-4 flex flex-wrap justify-center">
 			{#each entries as entry}
-				<button class=" mr-2  cursor-pointer flex items-center border border-gray-100 hover:border-blue-300 p-4 rounded-md"
+				<button class=" mr-4 mb-4 w-60  cursor-pointer flex items-center border border-gray-100 hover:border-blue-300 p-4 rounded-md"
 				on:click={()=>{
 					toPage(entry.link)
 				}}
