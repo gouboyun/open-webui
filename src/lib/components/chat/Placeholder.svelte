@@ -50,7 +50,7 @@
 			icon:'proicons:toolbox',
 			title:'效率工具箱',
 			subTitle:'集成各种办公室辅助工具',
-			link:''
+			link:'/tools'
 		},
 		{
 			icon:'codicon:book',
