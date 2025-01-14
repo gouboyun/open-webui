@@ -11,15 +11,18 @@
 </script>
 
 <div class="relative">
-	<button
-		class="flex w-full mx-2 items-center px-3 py-2 text-sm font-medium cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl"
-		on:click={() => {
-			filesInputElement.click();
-		}}
-	>
-		<DocumentArrowUpSolid />
-		<div class="line-clamp-1">{$i18n.t('Upload Files')}</div>
-	</button>
+    <div>
+        <button
+            class="flex w-full mx-2 items-center px-3 py-2 text-sm font-medium cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl"
+            on:click={() => {
+                filesInputElement.click();
+            }}
+        >
+            <DocumentArrowUpSolid />
+            <div class="line-clamp-1">{$i18n.t('Upload Files')}</div>
+        </button>
+    </div>
+	
 	<input
 		bind:this={filesInputElement}
 		type="file"
