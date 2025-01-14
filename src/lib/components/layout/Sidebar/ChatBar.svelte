@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getAllTags, getChatById, getChatList, getChatListBySearchText, getPinnedChatList, importChat, toggleChatPinnedStatusById, updateChatFolderIdById } from "$lib/apis/chats";
 	import { createNewFolder, getFolders, updateFolderParentIdById } from "$lib/apis/folders";
-	import { channels, chats, config, currentChatPage, pinnedChats, scrollPaginationEnabled, showArchivedChats, tags, temporaryChatEnabled, user } from "$lib/stores";
+	import { channels, chats, config, currentChatPage, pinnedChats, scrollPaginationEnabled, tags, temporaryChatEnabled, user } from "$lib/stores";
 	import { Loader, toast } from "svelte-sonner";
 	import SearchInput from "./SearchInput.svelte";
 	import { getContext } from "svelte";
@@ -12,7 +12,6 @@
 	import ChatItem from "./ChatItem.svelte";
 	import Folders from "./Folders.svelte";
 	import Spinner from "$lib/components/common/Spinner.svelte";
-	import UserMenu from "./UserMenu.svelte";
     
     const i18n = getContext('i18n');
     
@@ -475,33 +474,3 @@
     </Folder>
 </div>
 
-<div class="px-2">
-    <div class="flex flex-col font-primary">
-        {#if $user !== undefined}
-            <UserMenu
-                role={$user.role}
-                on:show={(e) => {
-                    if (e.detail === 'archived-chat') {
-                        showArchivedChats.set(true);
-                    }
-                }}
-            >
-                <button
-                    class=" flex items-center rounded-xl py-2.5 px-2.5 w-full hover:bg-gray-100 dark:hover:bg-gray-900 transition"
-                    on:click={() => {
-                        showDropdown = !showDropdown;
-                    }}
-                >
-                    <div class=" self-center mr-3">
-                        <img
-                            src={$user.profile_image_url}
-                            class=" max-w-[30px] object-cover rounded-full"
-                            alt="User profile"
-                        />
-                    </div>
-                    <div class=" self-center font-medium">{$user.name}</div>
-                </button>
-            </UserMenu>
-        {/if}
-    </div>
-</div>
