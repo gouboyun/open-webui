@@ -405,6 +405,8 @@
 			pageType = 'tools';
 		} else if (pathname.includes(`/pdf`)) {
 			pageType = 'pdf';
+		}  else if (pathname.includes(`/translation`)) {
+			pageType = 'translation';
 		} else{
 			pageType = 'chat';
 		}
@@ -952,6 +954,9 @@
 			</div>
 			{/if}
 			{#if pageType === 'pdf'}
+			<Pdf/>
+			{/if}
+			{#if pageType === 'translation'}
 			<Pdf/>
 			{/if}
 		</div>
