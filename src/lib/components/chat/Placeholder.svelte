@@ -62,7 +62,7 @@
 			icon:'ph:files',
 			title:'Chat PDF',
 			subTitle:'PDF文档阅读与对话助手',
-			link:''
+			link:'/pdf'
 		}
 	]
 	const toPage = (path)=>{
