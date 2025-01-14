@@ -671,8 +671,8 @@
 				</div>
 			</div>
 		{/if}
-
-		{#if pageType === 'chat'}
+		<div class=" flex-1 overflow-y-auto">
+			{#if pageType === 'chat'}
 			<div class="relative {$temporaryChatEnabled ? 'opacity-20' : ''}">
 				{#if $temporaryChatEnabled}
 					<div class="absolute z-40 w-full h-full flex justify-center"></div>
@@ -950,6 +950,8 @@
 				</Folder>
 			</div>
 		{/if}
+		</div>
+		
 		<div class="px-2">
 			<div class="flex flex-col font-primary">
 				{#if $user !== undefined}
