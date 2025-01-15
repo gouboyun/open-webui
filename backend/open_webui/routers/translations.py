@@ -30,7 +30,12 @@ log.setLevel(SRC_LOG_LEVELS["MODELS"])
 router = APIRouter()
 
 
-@router.post(f"/{fid}/{lang}", response_model=TranslationModel)
+@router.get("/demo")
+async def demo():
+    return {"message": "ok"}
+
+
+@router.post("/{fid}/{lang}", response_model=TranslationModel)
 async def translate_file(
     m: TranslationModel,
     fid: str,
