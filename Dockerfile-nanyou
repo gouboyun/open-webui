@@ -83,7 +83,7 @@ COPY --chown=$UID:$GID ./backend/requirements.txt ./requirements.txt
 
 RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple \
     && pip3 install uv && \
-    pip3 install --index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple torch torchvision torchaudio --no-cache-dir && \
+    # pip3 install --index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple torch torchvision torchaudio --no-cache-dir && \
     uv pip install --system -r requirements.txt --no-cache-dir && \
     chown -R $UID:$GID /app/backend/data/
 
