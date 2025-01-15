@@ -26,7 +26,7 @@ router = APIRouter()
 
 
 @router.post("/", response_model=TranslationModel)
-async def translate_memory(
+async def translate_file(
     request: Request,
     file: TranslationModel,
     user=Depends(get_verified_user),
@@ -38,47 +38,49 @@ async def translate_memory(
         
         # replace filename with uuid
         id = str(uuid.uuid4())
-        name = filename
         filename = f"{id}_{filename}"
-        contents, file_path = Storage.upload_file(file.file, filename)
+        
+        logging.info(f'fn = ${filename}')
+        
+        # contents, file_path = Storage.upload_file(file.file, filename)
         
 
-        file_item = Files.insert_new_file(
-            user.id,
-            FileForm(
-                **{
-                    "id": id,
-                    "filename": name,
-                    "path": file_path,
-                    "meta": {
-                        "name": name,
-                        "content_type": file.content_type,
-                        "size": len(contents),
-                    },
-                }
-            ),
-        )
+        # file_item = Files.insert_new_file(
+        #     user.id,
+        #     FileForm(
+        #         **{
+        #             "id": id,
+        #             "filename": name,
+        #             "path": file_path,
+        #             "meta": {
+        #                 "name": name,
+        #                 "content_type": file.content_type,
+        #                 "size": len(contents),
+        #             },
+        #         }
+        #     ),
+        # )
 
-        try:
-            process_file(request, ProcessFileForm(file_id=id))
-            file_item = Files.get_file_by_id(id=id)
-        except Exception as e:
-            log.exception(e)
-            log.error(f"Error processing file: {file_item.id}")
-            file_item = FileModelResponse(
-                **{
-                    **file_item.model_dump(),
-                    "error": str(e.detail) if hasattr(e, "detail") else str(e),
-                }
-            )
+        # try:
+        #     process_file(request, ProcessFileForm(file_id=id))
+        #     file_item = Files.get_file_by_id(id=id)
+        # except Exception as e:
+        #     log.exception(e)
+        #     log.error(f"Error processing file: {file_item.id}")
+        #     file_item = FileModelResponse(
+        #         **{
+        #             **file_item.model_dump(),
+        #             "error": str(e.detail) if hasattr(e, "detail") else str(e),
+        #         }
+        #     )
 
-        if file_item:
-            return file_item
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=ERROR_MESSAGES.DEFAULT("Error uploading file"),
-            )
+        # if file_item:
+        #     return file_item
+        # else:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_400_BAD_REQUEST,
+        #         detail=ERROR_MESSAGES.DEFAULT("Error uploading file"),
+        #     )
 
     except Exception as e:
         log.exception(e)

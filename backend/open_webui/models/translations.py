@@ -57,7 +57,7 @@ class TranslationModel(BaseModel):
 
 
 class TranslationsTable:
-    def insert_new_translate(
+    def insert_new_translation(
         self,
         user_id: str,
         content: str,
@@ -65,16 +65,15 @@ class TranslationsTable:
         with get_db() as db:
             id = str(uuid.uuid4())
 
-            memory = TranslationModel(
+            m = TranslationModel(
                 **{
                     "id": id,
                     "user_id": user_id,
-                    "content": content,
                     "created_at": int(time.time()),
                     "updated_at": int(time.time()),
                 }
             )
-            result = Translation(**memory.model_dump())
+            result = Translation(**m.model_dump())
             db.add(result)
             db.commit()
             db.refresh(result)
@@ -86,12 +85,14 @@ class TranslationsTable:
     def update_translation_by_id(
         self,
         id: str,
-        content: str,
+        translated: dict,
     ) -> Optional[TranslationModel]:
         with get_db() as db:
             try:
                 db.query(Translation).filter_by(id=id).update(
-                    {"content": content, "updated_at": int(time.time())}
+                    {
+                        "translated": translated, 
+                     "updated_at": int(time.time())}
                 )
                 db.commit()
                 return self.get_memory_by_id(id)
