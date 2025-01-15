@@ -1,10 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel
 import logging
+import os
+import uuid
+from pathlib import Path
 from typing import Optional
+from pydantic import BaseModel
+from urllib.parse import quote
 
-from open_webui.models.memories import Memories, MemoryModel
-from open_webui.retrieval.vector.connector import VECTOR_DB_CLIENT
+from fastapi import APIRouter, Depends, HTTPException, Request
+from open_webui.storage.provider import Storage
+
+from open_webui.models.translations import (
+    Translation,
+    TranslationModel,
+    TranslationsTable,
+)
+from open_webui.config import UPLOAD_DIR
 from open_webui.utils.auth import get_verified_user
 from open_webui.env import SRC_LOG_LEVELS
 
@@ -13,3 +23,66 @@ log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["MODELS"])
 
 router = APIRouter()
+
+
+@router.post("/", response_model=TranslationModel)
+async def translate_memory(
+    request: Request,
+    file: TranslationModel,
+    user=Depends(get_verified_user),
+):
+    log.info(f"Received translation request for {file.id}")
+    try:
+        unsanitized_filename = file.filename
+        filename = os.path.basename(unsanitized_filename)
+        
+        # replace filename with uuid
+        id = str(uuid.uuid4())
+        name = filename
+        filename = f"{id}_{filename}"
+        contents, file_path = Storage.upload_file(file.file, filename)
+        
+
+        file_item = Files.insert_new_file(
+            user.id,
+            FileForm(
+                **{
+                    "id": id,
+                    "filename": name,
+                    "path": file_path,
+                    "meta": {
+                        "name": name,
+                        "content_type": file.content_type,
+                        "size": len(contents),
+                    },
+                }
+            ),
+        )
+
+        try:
+            process_file(request, ProcessFileForm(file_id=id))
+            file_item = Files.get_file_by_id(id=id)
+        except Exception as e:
+            log.exception(e)
+            log.error(f"Error processing file: {file_item.id}")
+            file_item = FileModelResponse(
+                **{
+                    **file_item.model_dump(),
+                    "error": str(e.detail) if hasattr(e, "detail") else str(e),
+                }
+            )
+
+        if file_item:
+            return file_item
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=ERROR_MESSAGES.DEFAULT("Error uploading file"),
+            )
+
+    except Exception as e:
+        log.exception(e)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ERROR_MESSAGES.DEFAULT(e),
+        )
