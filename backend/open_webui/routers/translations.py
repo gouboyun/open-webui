@@ -15,8 +15,10 @@ from open_webui.models.translations import (
     TranslationsTable,
 )
 from open_webui.config import UPLOAD_DIR
-from open_webui.utils.auth import get_verified_user
 from open_webui.env import SRC_LOG_LEVELS
+from open_webui.constants import ERROR_MESSAGES
+
+from open_webui.utils.auth import get_verified_user
 
 
 log = logging.getLogger(__name__)
@@ -43,7 +45,6 @@ async def translate_file(
         logging.info(f'fn = ${filename}')
         
         # contents, file_path = Storage.upload_file(file.file, filename)
-        
 
         # file_item = Files.insert_new_file(
         #     user.id,
