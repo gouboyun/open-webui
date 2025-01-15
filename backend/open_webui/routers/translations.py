@@ -6,13 +6,16 @@ from typing import Optional
 from pydantic import BaseModel
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from open_webui.storage.provider import Storage
 
 from open_webui.models.translations import (
     Translation,
     TranslationModel,
     TranslationsTable,
+)
+from open_webui.models.files import (
+    Files
 )
 from open_webui.config import UPLOAD_DIR
 from open_webui.env import SRC_LOG_LEVELS
@@ -27,22 +30,28 @@ log.setLevel(SRC_LOG_LEVELS["MODELS"])
 router = APIRouter()
 
 
-@router.post("/", response_model=TranslationModel)
+@router.post(f"/{fid}/{lang}", response_model=TranslationModel)
 async def translate_file(
-    request: Request,
-    file: TranslationModel,
+    m: TranslationModel,
+    fid: str,
+    lang: str,
     user=Depends(get_verified_user),
 ):
-    log.info(f"Received translation request for {file.id}")
+    log.info(f"translate file={fid} to {lang}")
     try:
-        unsanitized_filename = file.filename
-        filename = os.path.basename(unsanitized_filename)
+        f = Files.get_file_by_id(fid)
+        if not f:
+            return TranslationModel(
+                **{
+                    "error": "File not found",
+                }
+            )
         
         # replace filename with uuid
-        id = str(uuid.uuid4())
-        filename = f"{id}_{filename}"
+        new_id = str(uuid.uuid4())
+        filename = f"{fid}_{new_id}"
         
-        logging.info(f'fn = ${filename}')
+        logging.info(f'filename = ${filename}')
         
         # contents, file_path = Storage.upload_file(file.file, filename)
 

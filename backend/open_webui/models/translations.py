@@ -14,20 +14,14 @@ from sqlalchemy import BigInteger, Column, String, Text, JSON
 class Translation(Base):
     __tablename__ = "translation"
 
-    __tablename__ = "file"
     id = Column(String, primary_key=True)
     user_id = Column(String)
-    hash = Column(Text, nullable=True)
     
-    filename = Column(Text)
-    path = Column(Text, nullable=True)
-    # {
-    #     "en": {
-    #         "filename": "a.txt",
-    #         "path": "/home/user/",
-    #     },...
-    # }
-    translated = Column(JSON, nullable=True)
+    fid = Column(String)
+    tran_fid = Column(String)
+
+    lang = Column(String, nullable=True)
+    trans_lang = Column(String, nullable=True)
 
     access_control = Column(JSON, nullable=True)
 
@@ -39,9 +33,8 @@ class TranslationModel(BaseModel):
     id: str
     user_id: str
     
-    hash: Optional[str] = None
-    
-    filename: str
+    fid: str
+    tran_fid: str
     path: Optional[str] = None
 
     translated: Optional[dict] = None
@@ -50,6 +43,17 @@ class TranslationModel(BaseModel):
     created_at: Optional[int]  # timestamp in epoch
     updated_at: Optional[int]  # timestamp in epoch
 
+
+class TranslationModelResponse(BaseModel):
+    id: str
+    user_id: str
+
+    # meta: FileMeta
+
+    created_at: int  # timestamp in epoch
+    updated_at: int  # timestamp in epoch
+
+    model_config = ConfigDict(extra="allow")
 
 ####################
 # Forms
