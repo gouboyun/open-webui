@@ -23,6 +23,7 @@ from open_webui.constants import ERROR_MESSAGES
 
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status, Request
+from fastapi import Query
 from fastapi.responses import FileResponse, StreamingResponse
 
 
@@ -41,7 +42,9 @@ router = APIRouter()
 
 @router.post("/", response_model=FileModelResponse)
 def upload_file(
-    request: Request, file: UploadFile = File(...), user=Depends(get_verified_user)
+    request: Request, file: UploadFile = File(...), 
+    folder: str = Query(max_length=20, default=""),
+    user=Depends(get_verified_user)
 ):
     log.info(f"file.content_type: {file.content_type}")
     try:
@@ -63,6 +66,7 @@ def upload_file(
                     "path": file_path,
                     "meta": {
                         "name": name,
+                        "folder": folder,
                         "content_type": file.content_type,
                         "size": len(contents),
                     },
