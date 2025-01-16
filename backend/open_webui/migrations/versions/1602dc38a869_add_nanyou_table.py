@@ -1,8 +1,8 @@
-"""Add config table
+"""Add pdffolder
 
 Revision ID: 1602dc38a869
 Revises: 3781e22d8b01
-Create Date: 2024-08-25 15:26:35.241684
+Create Date: 2025-01-16 18:26:35.241684
 
 """
 
@@ -20,7 +20,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade():
     op.create_table(
-        "pdftable",
+        "pdffolder",
         sa.Column("id", sa.Text(), primary_key=True),
         sa.Column("user_id", sa.Text(), nullable=False),
         sa.Column("name", sa.Text(), nullable=False),
@@ -33,4 +33,4 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_table("pdftable")
+    op.drop_table("pdffolder")

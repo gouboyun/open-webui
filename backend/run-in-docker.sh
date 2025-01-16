@@ -2,10 +2,11 @@
 
 cd $(dirname $0)
 
-image=registry.cn-wulanchabu.aliyuncs.com/gouboyun-pub/python:3.11-slim-bookworm
+# image=registry.cn-wulanchabu.aliyuncs.com/gouboyun-pub/python:3.11-slim-bookworm
+image=registry.cn-wulanchabu.aliyuncs.com/gouboyun-pub/ai-openwebui:py-base
 
 
-docker run -it --memory=4g --rm -v `pwd`:/code -w /code $image bash
+docker run -it --memory=4g --rm -v `pwd`:/app/backend/ -w /app/backend/ $image bash
 
 # apt-get update
 # cp sources.list /etc/apt/sources.list
