@@ -137,7 +137,7 @@ class PdfFolderTable:
         self, user_id: str
     ) -> list[PdfFolderUserModel]:
         with get_db() as db:
-            arr =db.query(PdfFolder).filter_by(PdfFolder.user_id==user_id).order_by(PdfFolder.updated_at.desc()).all()
+            arr =db.query(PdfFolder).filter_by(user_id=user_id).order_by(PdfFolder.updated_at.desc()).all()
             return arr
 
     def get_folder_by_id(self, id: str) -> Optional[PdfFolderModel]:
