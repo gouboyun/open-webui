@@ -406,7 +406,7 @@ def get_model_path(model: str, update_model: bool = False):
         log.debug(f"model_repo_path: {model_repo_path}")
         return model_repo_path
     except Exception as e:
-        log.exception(f"Cannot determine model snapshot path: {e}")
+        log.info(f"Cannot determine model snapshot path: {e}")
         return model
 
 
