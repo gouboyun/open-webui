@@ -90,6 +90,33 @@ class PdfFolderForm(BaseModel):
 
 
 class PdfFolderTable:
+    
+    def insert_special_folder(
+        self, user_id: str, form_data: PdfFolderForm
+    ):
+        with get_db() as db:
+            m = PdfFolderModel(
+                **{
+                    **form_data.model_dump(),
+                    "id": user_id,
+                    "user_id": user_id,
+                    "created_at": int(time.time()),
+                    "updated_at": int(time.time()),
+                }
+            )
+
+            try:
+                result = PdfFolder(**m.model_dump())
+                db.add(result)
+                db.commit()
+                db.refresh(result)
+                if result:
+                    return PdfFolderModel.model_validate(result)
+                else:
+                    return None
+            except Exception:
+                return None
+        
     def insert_new_folder(
         self, user_id: str, form_data: PdfFolderForm
     ) -> Optional[PdfFolderModel]:
@@ -130,7 +157,7 @@ class PdfFolderTable:
                     PdfFolderUserModel.model_validate(
                         {
                             **PdfFolderModel.model_validate(i).model_dump(),
-                            "user": user.user() if user else None,
+                            "user": user.model_dump() if user else None,
                         },
                     )
                 )
@@ -140,6 +167,7 @@ class PdfFolderTable:
         try:
             with get_db() as db:
                 m = db.query(PdfFolder).filter_by(id=id).first()
+                log.error(f"id={id} dddd {m}")
                 return PdfFolderModel.model_validate(m) if m else None
         except Exception:
             return None
