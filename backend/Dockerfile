@@ -20,12 +20,7 @@ ARG BUILD_HASH=dev-build
 ARG UID=0
 ARG GID=0
 
-######## WebUI frontend ########
-# nothing to do for frontend
-
-######## WebUI backend ########
-# FROM registry.cn-wulanchabu.aliyuncs.com/gouboyun-pub/python:3.11-slim-bookworm AS base
-FROM registry.cn-wulanchabu.aliyuncs.com/gouboyun-pub/ai-openwebui:py-base AS base
+FROM registry.cn-wulanchabu.aliyuncs.com/gouboyun-pub/python:3.11-slim-bookworm AS base
 
 # Use args
 ARG USE_CUDA
@@ -83,9 +78,39 @@ WORKDIR /app/backend
 
 ENV HOME=/root
 # Create user and group if not root
+RUN if [ $UID -ne 0 ]; then \
+    if [ $GID -ne 0 ]; then \
+    addgroup --gid $GID app; \
+    fi; \
+    adduser --uid $UID --gid $GID --home $HOME --disabled-password --no-create-home app; \
+    fi
 
+RUN mkdir -p $HOME/.cache/chroma
+RUN echo -n 00000000-0000-0000-0000-000000000000 > $HOME/.cache/chroma/telemetry_user_id
 
+# Make sure the user has access to the app and root directory
+RUN chown -R $UID:$GID /app $HOME
 
+COPY .docker/sources.list /etc/apt/sources.list
+
+RUN rm -f /etc/apt/sources.list.d/* && \
+    apt-get update && \
+    # for RAG OCR
+    apt-get install -y --no-install-recommends ffmpeg libsm6 libxext6 && \
+    # cleanup
+    rm -rf /var/lib/apt/lists/*;
+
+# install python dependencies
+COPY --chown=$UID:$GID ./requirements.txt ./requirements.txt
+COPY --chown=$UID:$GID ./requirements.txt ./requirements.txt
+
+ENV UV_HTTP_TIMEOUT=60
+RUN pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple && \
+    pip3 install --no-cache-dir -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple uv && \
+    # pip3 install --index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple torch torchvision torchaudio --no-cache-dir && \
+    uv pip install --no-color -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple --system -r requirements.txt --no-cache-dir && \
+    mkdir -p /app/backend/data/ && \
+    chown -R $UID:$GID /app/backend/data/
 
 
 
@@ -94,12 +119,12 @@ ENV HOME=/root
 # COPY --from=build /app/onnx /root/.cache/chroma/onnx_models/all-MiniLM-L6-v2/onnx
 
 # copy built frontend files
-COPY --chown=$UID:$GID  ./build /app/build
-COPY --chown=$UID:$GID ./CHANGELOG.md /app/CHANGELOG.md
-COPY --chown=$UID:$GID ./package.json /app/package.json
+# COPY --chown=$UID:$GID /app/build /app/build
+# COPY --chown=$UID:$GID --from=build /app/CHANGELOG.md /app/CHANGELOG.md
+# COPY --chown=$UID:$GID --from=build /app/package.json /app/package.json
 
 # copy backend files
-COPY --chown=$UID:$GID ./backend .
+# COPY --chown=$UID:$GID ./ ./
 
 EXPOSE 8080
 
@@ -111,4 +136,4 @@ ARG BUILD_HASH
 ENV WEBUI_BUILD_VERSION=${BUILD_HASH}
 ENV DOCKER=true
 
-CMD [ "bash", "start.sh"]
+# CMD [ "bash", "start.sh"]

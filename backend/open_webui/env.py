@@ -37,25 +37,26 @@ DOCKER = os.environ.get("DOCKER", "False").lower() == "true"
 USE_CUDA = os.environ.get("USE_CUDA_DOCKER", "false")
 
 if USE_CUDA.lower() == "true":
-    try:
-        import torch
+    # try:
+    #     import torch
 
-        assert torch.cuda.is_available(), "CUDA not available"
-        DEVICE_TYPE = "cuda"
-    except Exception as e:
-        cuda_error = (
-            "Error when testing CUDA but USE_CUDA_DOCKER is true. "
-            f"Resetting USE_CUDA_DOCKER to false: {e}"
-        )
-        os.environ["USE_CUDA_DOCKER"] = "false"
-        USE_CUDA = "false"
+    #     assert torch.cuda.is_available(), "CUDA not available"
+    #     DEVICE_TYPE = "cuda"
+    # except Exception as e:
+    #     cuda_error = (
+    #         "Error when testing CUDA but USE_CUDA_DOCKER is true. "
+    #         f"Resetting USE_CUDA_DOCKER to false: {e}"
+    #     )
+    #     os.environ["USE_CUDA_DOCKER"] = "false"
+    #     USE_CUDA = "false"
         DEVICE_TYPE = "cpu"
 else:
     DEVICE_TYPE = "cpu"
 
 try:
-    if torch.backends.mps.is_available() and torch.backends.mps.is_built():
-        DEVICE_TYPE = "mps"
+    # if torch.backends.mps.is_available() and torch.backends.mps.is_built():
+    #     DEVICE_TYPE = "mps"
+    pass
 except Exception:
     pass
 
@@ -67,7 +68,8 @@ log_levels = ["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]
 
 GLOBAL_LOG_LEVEL = os.environ.get("GLOBAL_LOG_LEVEL", "").upper()
 if GLOBAL_LOG_LEVEL in log_levels:
-    logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL, force=True)
+    fmt = '%(levelname)s-%(asctime)s %(message)s'
+    logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL, format=fmt, force=True)
 else:
     GLOBAL_LOG_LEVEL = "INFO"
 
@@ -104,9 +106,10 @@ for source in log_sources:
 log.setLevel(SRC_LOG_LEVELS["CONFIG"])
 
 
-WEBUI_NAME = os.environ.get("WEBUI_NAME", "Open WebUI")
-if WEBUI_NAME != "Open WebUI":
-    WEBUI_NAME += " (Open WebUI)"
+WEBUI_NAME = os.environ.get("WEBUI_NAME", "NY-WebUI")
+
+# if WEBUI_NAME != "Open WebUI":
+#     WEBUI_NAME += " (Open WebUI)"
 
 WEBUI_FAVICON_URL = "https://openwebui.com/favicon.png"
 

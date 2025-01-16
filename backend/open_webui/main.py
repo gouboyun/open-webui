@@ -64,10 +64,12 @@ from open_webui.routers import (
     configs,
     groups,
     files,
+    translations,
     functions,
     memories,
     models,
     knowledge,
+    pdfs,
     prompts,
     evaluations,
     tools,
@@ -325,17 +327,8 @@ class SPAStaticFiles(StaticFiles):
 
 print(
     rf"""
-  ___                    __        __   _     _   _ ___
- / _ \ _ __   ___ _ __   \ \      / /__| |__ | | | |_ _|
-| | | | '_ \ / _ \ '_ \   \ \ /\ / / _ \ '_ \| | | || |
-| |_| | |_) |  __/ | | |   \ V  V /  __/ |_) | |_| || |
- \___/| .__/ \___|_| |_|    \_/\_/ \___|_.__/ \___/|___|
-      |_|
-
-
 v{VERSION} - building the best open-source AI user interface.
 {f"Commit: {WEBUI_BUILD_HASH}" if WEBUI_BUILD_HASH != "dev-build" else ""}
-https://github.com/open-webui/open-webui
 """
 )
 
@@ -350,8 +343,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    docs_url="/docs" if ENV == "dev" else None,
-    openapi_url="/openapi.json" if ENV == "dev" else None,
+    docs_url="/docs", # if ENV == "dev" else None,
+    openapi_url="/openapi.json", # if ENV == "dev" else None,
     redoc_url=None,
     lifespan=lifespan,
 )
@@ -763,6 +756,8 @@ app.include_router(memories.router, prefix="/api/v1/memories", tags=["memories"]
 app.include_router(folders.router, prefix="/api/v1/folders", tags=["folders"])
 app.include_router(groups.router, prefix="/api/v1/groups", tags=["groups"])
 app.include_router(files.router, prefix="/api/v1/files", tags=["files"])
+app.include_router(pdfs.router, prefix="/api/v1/pdffolder", tags=["pdffolder"])
+app.include_router(translations.router, prefix="/api/v1/translations", tags=["translations"])
 app.include_router(functions.router, prefix="/api/v1/functions", tags=["functions"])
 app.include_router(
     evaluations.router, prefix="/api/v1/evaluations", tags=["evaluations"]

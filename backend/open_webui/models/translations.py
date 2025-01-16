@@ -14,20 +14,14 @@ from sqlalchemy import BigInteger, Column, String, Text, JSON
 class Translation(Base):
     __tablename__ = "translation"
 
-    __tablename__ = "file"
     id = Column(String, primary_key=True)
     user_id = Column(String)
-    hash = Column(Text, nullable=True)
     
-    filename = Column(Text)
-    path = Column(Text, nullable=True)
-    # {
-    #     "en": {
-    #         "filename": "a.txt",
-    #         "path": "/home/user/",
-    #     },...
-    # }
-    translated = Column(JSON, nullable=True)
+    fid = Column(String)
+    tran_fid = Column(String)
+
+    lang = Column(String, nullable=True)
+    trans_lang = Column(String, nullable=True)
 
     access_control = Column(JSON, nullable=True)
 
@@ -39,9 +33,8 @@ class TranslationModel(BaseModel):
     id: str
     user_id: str
     
-    hash: Optional[str] = None
-    
-    filename: str
+    fid: str
+    tran_fid: str
     path: Optional[str] = None
 
     translated: Optional[dict] = None
@@ -51,13 +44,24 @@ class TranslationModel(BaseModel):
     updated_at: Optional[int]  # timestamp in epoch
 
 
+class TranslationModelResponse(BaseModel):
+    id: str
+    user_id: str
+
+    # meta: FileMeta
+
+    created_at: int  # timestamp in epoch
+    updated_at: int  # timestamp in epoch
+
+    model_config = ConfigDict(extra="allow")
+
 ####################
 # Forms
 ####################
 
 
 class TranslationsTable:
-    def insert_new_translate(
+    def insert_new_translation(
         self,
         user_id: str,
         content: str,
@@ -65,16 +69,15 @@ class TranslationsTable:
         with get_db() as db:
             id = str(uuid.uuid4())
 
-            memory = TranslationModel(
+            m = TranslationModel(
                 **{
                     "id": id,
                     "user_id": user_id,
-                    "content": content,
                     "created_at": int(time.time()),
                     "updated_at": int(time.time()),
                 }
             )
-            result = Translation(**memory.model_dump())
+            result = Translation(**m.model_dump())
             db.add(result)
             db.commit()
             db.refresh(result)
@@ -86,12 +89,14 @@ class TranslationsTable:
     def update_translation_by_id(
         self,
         id: str,
-        content: str,
+        translated: dict,
     ) -> Optional[TranslationModel]:
         with get_db() as db:
             try:
                 db.query(Translation).filter_by(id=id).update(
-                    {"content": content, "updated_at": int(time.time())}
+                    {
+                        "translated": translated, 
+                     "updated_at": int(time.time())}
                 )
                 db.commit()
                 return self.get_memory_by_id(id)
