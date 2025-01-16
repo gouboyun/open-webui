@@ -533,3 +533,15 @@ def add_files_to_folder_batch(
     return PdfFilesResponse(
         **m.model_dump(), files=Files.get_files_by_ids(existing_file_ids)
     )
+
+
+@router.delete("/all")
+def batch_del_all_folders(
+    request: Request,
+    user=Depends(get_verified_user),
+):
+    """
+    batch delete all folders
+    """
+    Pdfs.delete_all_folder_by_uid(user.id)
+    return {}

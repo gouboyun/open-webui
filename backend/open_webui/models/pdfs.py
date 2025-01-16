@@ -217,10 +217,10 @@ class PdfFolderTable:
         except Exception:
             return False
 
-    def delete_all_folder(self) -> bool:
+    def delete_all_folder_by_uid(self, uid: str) -> bool:
         with get_db() as db:
             try:
-                db.query(PdfFolder).delete()
+                db.query(PdfFolder).filter(user_id = uid).delete()
                 db.commit()
 
                 return True
