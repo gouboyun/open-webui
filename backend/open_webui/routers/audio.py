@@ -453,7 +453,7 @@ async def speech(request: Request, user=Depends(get_verified_user)):
 
 
 def transcribe(request: Request, file_path):
-    print("transcribe", file_path)
+    log.info(f'transcribe file={file_path}')
     filename = os.path.basename(file_path)
     file_dir = os.path.dirname(file_path)
     id = filename.split(".")[0]

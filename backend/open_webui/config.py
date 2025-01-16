@@ -603,6 +603,13 @@ Path(UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
 CACHE_DIR = f"{DATA_DIR}/cache"
 Path(CACHE_DIR).mkdir(parents=True, exist_ok=True)
 
+
+####################################
+# Translate settings
+####################################
+
+TRANSLATE_MODEL = os.environ.get("TRANSLATE_MODEL", "t5-small").lower()
+
 ####################################
 # OLLAMA_BASE_URL
 ####################################

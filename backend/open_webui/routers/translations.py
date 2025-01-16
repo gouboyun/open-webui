@@ -3,8 +3,13 @@ import os
 import uuid
 from pathlib import Path
 from typing import Optional
+import json
+
 from pydantic import BaseModel
 from urllib.parse import quote
+
+import aiohttp
+import requests
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from open_webui.storage.provider import Storage
@@ -17,7 +22,11 @@ from open_webui.models.translations import (
 from open_webui.models.files import (
     Files
 )
-from open_webui.config import UPLOAD_DIR
+import open_webui.config as config
+from open_webui.config import (
+    UPLOAD_DIR,
+    OLLAMA_BASE_URL,
+    )
 from open_webui.env import SRC_LOG_LEVELS
 from open_webui.constants import ERROR_MESSAGES
 
@@ -42,7 +51,9 @@ async def translate_file(
     lang: str,
     user=Depends(get_verified_user),
 ):
-    log.info(f"translate file={fid} to {lang}")
+    new_id = str(uuid.uuid4())
+    
+    log.info(f"translate file={fid} to {lang}, and write back to {new_id}")
     try:
         f = Files.get_file_by_id(fid)
         if not f:
@@ -52,11 +63,47 @@ async def translate_file(
                 }
             )
         
-        # replace filename with uuid
-        new_id = str(uuid.uuid4())
-        filename = f"{fid}_{new_id}"
+        file_path = os.path.join(f.path, f.filename)
+        p1 = Path(f.filename)
+        p2 = Path(f.path, new_id, p1.suffix)
         
-        logging.info(f'filename = ${filename}')
+        try:
+            llmURL = OLLAMA_BASE_URL + "/translate"
+            
+            r = requests.post(
+                url=llmURL, 
+                files={"file": (f.filename, open(file_path, "rb"))},
+                data={
+                    "model": config.TRANSLATE_MODEL, 
+                    # { to: "zh" | "en", translation_value: string }
+                    },
+            )
+            r.raise_for_status()
+            data = r.json()
+
+            with open(p2.resolve(), "w") as f:
+                json.dump(data, f)
+
+            return data
+        
+            # timeout = aiohttp.ClientTimeout(total=15)
+            # async with aiohttp.ClientSession(timeout=timeout, trust_env=True) as session:
+            #     async with session.post(
+            #         llmURL, 
+            #         files = {
+            #             'file': ('trans', open(file_path, 'rb')),
+            #         },
+            #         data= {
+            #             "model": "qwen2.5:14b",
+            #             "lang": lang,
+            #             },
+            #     ) as response:
+            #         response.raise_for_status()
+            #         data = await response.json()
+
+        except Exception as e:
+            log.exception(e)
+            return {"msg": str(e.args)}
         
         # contents, file_path = Storage.upload_file(file.file, filename)
 
