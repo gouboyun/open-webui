@@ -206,6 +206,8 @@ def add_file_to_folder_by_id(
     form_data: PdfFolderFileIdForm,
     user=Depends(get_verified_user),
 ):
+    if id.lower() == "null":
+        id = ""
     m = Pdfs.get_folder_by_id(id=id)
 
     if not m:
