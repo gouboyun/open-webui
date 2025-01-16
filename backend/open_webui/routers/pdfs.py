@@ -210,6 +210,7 @@ def add_file_to_folder_by_id(
         id = user.id
     m = Pdfs.get_folder_by_id(id=id)
     if not m and id == user.id:
+        # 用当前用户 id 作为 folder_id 单独创建一个 folder
         m = Pdfs.insert_special_folder(user.id, PdfFolderForm(name='-', description="empty"))
 
     if not m:
