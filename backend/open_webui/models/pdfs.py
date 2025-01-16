@@ -167,7 +167,6 @@ class PdfFolderTable:
         try:
             with get_db() as db:
                 m = db.query(PdfFolder).filter_by(id=id).first()
-                log.error(f"id={id} dddd {m}")
                 return PdfFolderModel.model_validate(m) if m else None
         except Exception:
             return None
