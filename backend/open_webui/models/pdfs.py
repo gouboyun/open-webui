@@ -116,28 +116,24 @@ class PdfFolderTable:
             except Exception:
                 return None
 
-    # def get_folder_bases(self) -> list[PdfFolderUserModel]:
-    #     with get_db() as db:
-    #         folder_bases = [] 
-    #         for folder in (
-    #             db.query(PdfFolder).order_by(PdfFolder.updated_at.desc()).all()
-    #         ):
-    #             user = Users.get_user_by_id(folder.user_id)
-    #             folder_bases.append(
-    #                 PdfFolderUserModel.model_validate(
-    #                     {
-    #                         **PdfFolderModel.model_validate(folder).model_dump(),
-    #                         "user": user.model_dump() if user else None,
-    #                     }
-    #                 )
-    #             )
-    #         return folder_bases
-
     def get_folders_by_user_id(
         self, user_id: str
     ) -> list[PdfFolderUserModel]:
         with get_db() as db:
-            arr =db.query(PdfFolder).filter_by(user_id=user_id).order_by(PdfFolder.updated_at.desc()).all()
+            arr = []
+            for i in (
+                db.query(PdfFolder).filter_by(user_id=user_id). \
+                    order_by(PdfFolder.updated_at.desc()).all()
+                ):
+                user = Users.get_user_by_id(i.user_id)
+                arr.append(
+                    PdfFolderUserModel.model_validate(
+                        {
+                            **PdfFolderModel.model_validate(i).model_dump(),
+                            "user": user.user() if user else None,
+                        },
+                    )
+                )
             return arr
 
     def get_folder_by_id(self, id: str) -> Optional[PdfFolderModel]:
