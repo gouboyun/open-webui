@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import SearchInput from './SearchInput.svelte';
 	import DocumentArrowUpSolid from '$lib/components/icons/DocumentArrowUpSolid.svelte';
 	import { config, user as _user } from '$lib/stores';
@@ -10,13 +10,18 @@
 	import { blobToFile } from '$lib/utils';
 	import { uploadFile } from '$lib/apis/files';
 	import FileItem from '$lib/components/common/FileItem.svelte';
-	import { addFileToPdfById } from '$lib/apis/pdf';
+	import { addFileToPdfById, deletePdfAll, getPdfList } from '$lib/apis/pdf';
 
 	import AddContentMenu from '$lib/components/pdf/AddContentMenu.svelte';
+
+	onMount(async () => {
+		//await deletePdfAll(localStorage.token);
+		await getFiles()
+	});
 	const i18n = getContext('i18n');
 	let filesInputElement;
 	let inputFiles;
-	let files = [];
+	let files: any[] = [];
 
 	const uploadFileHandler = async (file, fullContext: boolean = false) => {
 		if ($_user?.role !== 'admin' && !($_user?.permissions?.chat?.file_upload ?? true)) {
@@ -66,7 +71,6 @@
 			const uploadedFile = await uploadFile(localStorage.token, file);
 
 			if (uploadedFile) {
-				debugger;
 				console.log('File upload completed:', {
 					id: uploadedFile.id,
 					name: fileItem.name,
@@ -99,10 +103,13 @@
 	};
 
 	const addFileHandler = async (fileId) => {
-		const updatedKnowledge = await addFileToPdfById(localStorage.token, id, fileId).catch((e) => {
+		const updatedKnowledge = await addFileToPdfById(localStorage.token, null, fileId).catch((e) => {
 			toast.error(e);
 			return null;
 		});
+		if(updatedKnowledge){
+			await getFiles()
+		}
 
 		// if (updatedKnowledge) {
 		// 	knowledge = updatedKnowledge;
@@ -113,6 +120,14 @@
 		// }
 	};
 
+	const getFiles = async () => {
+		try {
+			const res = await getPdfList(localStorage.token);
+			files = res[0].files;
+		} catch (e) {
+			files = [];
+		}
+	};
 	const inputFilesHandler = async (_files) => {
 		console.log('Input files handler called with:', _files);
 		_files.forEach((file) => {
@@ -218,6 +233,7 @@
 									// } else {
 									// 	document.getElementById('files-input').click();
 									// }
+									filesInputElement.click();
 								}}
 								on:sync={(e) => {
 									//showSyncConfirmModal = true;
@@ -256,7 +272,29 @@
 	</div>
 
 	
+	{#each files as file, fileIdx}
+	<div class=" px-4">
+		<FileItem
+		className="w-full"
+		item={file}
+		url={file?.url ? file.url : null}
+		name={file.meta.name}
+		type={file.meta.content_type}
+		size={file?.meta.size}
+		dismissible={true}
+		on:dismiss={() => {
+			// Remove the file from the chatFiles array
 
+			// chatFiles.splice(fileIdx, 1);
+			// chatFiles = chatFiles;
+		}}
+		on:click={() => {
+			console.log(file);
+		}}
+	/>
+	</div>
+	
+{/each}
 	<!-- <FileItem
         item={file}
         url={file.url}
