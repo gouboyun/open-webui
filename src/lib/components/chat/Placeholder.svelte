@@ -5,7 +5,7 @@
 	import { onMount, getContext, tick, createEventDispatcher } from 'svelte';
 	import { blur, fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-
+	import logoImg from '$lib/assets/images/njupt.png'
 	const dispatch = createEventDispatcher();
 
 	import { config, user, models as _models, temporaryChatEnabled, pageType } from '$lib/stores';
@@ -140,7 +140,10 @@
 		class="w-full text-3xl text-gray-800 dark:text-gray-100 font-medium text-center flex items-center gap-4 font-primary"
 	>
 		<div class="w-full flex flex-col justify-center items-center">
-			<div class="flex flex-row justify-center gap-3 sm:gap-3.5 w-fit px-5">
+			<div class='text-4xl mb-2 flex items-center'>
+				<img src={logoImg} alt="logo"  class=" w-12 h-12 mr-4"/>
+				南京邮电大学AI大模型管理台</div>
+			<!-- <div class="flex flex-row justify-center gap-3 sm:gap-3.5 w-fit px-5">
 				<div class="flex flex-shrink-0 justify-center">
 					<div class="flex -space-x-4 mb-0.5" in:fade={{ duration: 100 }}>
 						{#each models as model, modelIdx}
@@ -171,14 +174,14 @@
 					</div>
 				</div>
 
-				<div class=" text-3xl sm:text-4xl line-clamp-1" in:fade={{ duration: 100 }}>
+				<div class=" text-3xl sm:text-3xl line-clamp-1" in:fade={{ duration: 100 }}>
 					{#if models[selectedModelIdx]?.name}
 						{models[selectedModelIdx]?.name}
 					{:else}
 						{$i18n.t('Hello, {{name}}', { name: $user.name })}
 					{/if}
 				</div>
-			</div>
+			</div> -->
 
 			<div class="flex mt-1 mb-2">
 				<div in:fade={{ duration: 100, delay: 50 }}>
