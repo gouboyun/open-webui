@@ -34,23 +34,6 @@ class PdfFolder(Base):
     data = Column(JSON, nullable=True)
     meta = Column(JSON, nullable=True)
 
-
-    # Defines access control rules for this entry.
-    # - `None`: Public access, available to all users with the "user" role.
-    # - `{}`: Private access, restricted exclusively to the owner.
-    # - Custom permissions: Specific access control for reading and writing;
-    #   Can specify group or user-level restrictions:
-    #   {
-    #      "read": {
-    #          "group_ids": ["group_id1", "group_id2"],
-    #          "user_ids":  ["user_id1", "user_id2"]
-    #      },
-    #      "write": {
-    #          "group_ids": ["group_id1", "group_id2"],
-    #          "user_ids":  ["user_id1", "user_id2"]
-    #      }
-    #   }
-
     created_at = Column(BigInteger)
     updated_at = Column(BigInteger)
 
@@ -90,6 +73,33 @@ class PdfFolderForm(BaseModel):
 
 
 class PdfFolderTable:
+    
+    def insert_special_folder(
+        self, user_id: str, form_data: PdfFolderForm
+    ):
+        with get_db() as db:
+            m = PdfFolderModel(
+                **{
+                    **form_data.model_dump(),
+                    "id": user_id,
+                    "user_id": user_id,
+                    "created_at": int(time.time()),
+                    "updated_at": int(time.time()),
+                }
+            )
+
+            try:
+                result = PdfFolder(**m.model_dump())
+                db.add(result)
+                db.commit()
+                db.refresh(result)
+                if result:
+                    return PdfFolderModel.model_validate(result)
+                else:
+                    return None
+            except Exception:
+                return None
+        
     def insert_new_folder(
         self, user_id: str, form_data: PdfFolderForm
     ) -> Optional[PdfFolderModel]:
@@ -130,7 +140,7 @@ class PdfFolderTable:
                     PdfFolderUserModel.model_validate(
                         {
                             **PdfFolderModel.model_validate(i).model_dump(),
-                            "user": user.user() if user else None,
+                            "user": user.model_dump() if user else None,
                         },
                     )
                 )
@@ -189,10 +199,10 @@ class PdfFolderTable:
         except Exception:
             return False
 
-    def delete_all_folder(self) -> bool:
+    def delete_all_folder_by_uid(self, uid: str) -> bool:
         with get_db() as db:
             try:
-                db.query(PdfFolder).delete()
+                db.query(PdfFolder).filter(user_id = uid).delete()
                 db.commit()
 
                 return True

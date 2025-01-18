@@ -206,7 +206,12 @@ def add_file_to_folder_by_id(
     form_data: PdfFolderFileIdForm,
     user=Depends(get_verified_user),
 ):
+    if id.lower() == "null":
+        id = user.id
     m = Pdfs.get_folder_by_id(id=id)
+    if not m and id == user.id:
+        # 用当前用户 id 作为 folder_id 单独创建一个 folder
+        m = Pdfs.insert_special_folder(user.id, PdfFolderForm(name='-', description="empty"))
 
     if not m:
         raise HTTPException(
@@ -529,3 +534,15 @@ def add_files_to_folder_batch(
     return PdfFilesResponse(
         **m.model_dump(), files=Files.get_files_by_ids(existing_file_ids)
     )
+
+
+@router.delete("/all")
+def batch_del_all_folders(
+    request: Request,
+    user=Depends(get_verified_user),
+):
+    """
+    batch delete all folders
+    """
+    Pdfs.delete_all_folder_by_uid(user.id)
+    return {}
