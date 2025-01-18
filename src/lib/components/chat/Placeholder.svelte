@@ -8,7 +8,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	import { config, user, models as _models, temporaryChatEnabled } from '$lib/stores';
+	import { config, user, models as _models, temporaryChatEnabled, pageType } from '$lib/stores';
 	import { sanitizeResponseContent, findWordIndices } from '$lib/utils';
 	import { WEBUI_BASE_URL } from '$lib/constants';
 
@@ -248,6 +248,7 @@
 		</div>
 	</div>
 	<div class="mx-auto  font-primary" in:fade={{ duration: 200, delay: 200 }}>
+		{#if $pageType === 'chat'}
 		<div class="mx-5 mt-4 flex flex-wrap justify-center">
 			{#each entries as entry}
 				<button class=" mr-4 mb-4 w-60  cursor-pointer flex items-center border border-gray-100 hover:border-blue-300 p-4 rounded-md"
@@ -274,5 +275,6 @@
 				}}
 			/> -->
 		</div>
+		{/if}
 	</div>
 </div>

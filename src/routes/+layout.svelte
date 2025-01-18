@@ -22,7 +22,10 @@
 		currentChatPage,
 		tags,
 		temporaryChatEnabled,
-		isLastActiveTab
+		isLastActiveTab,
+
+		pageType
+
 	} from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -50,6 +53,22 @@
 	let loaded = false;
 
 	const BREAKPOINT = 768;
+
+		// let pageType = 'chat';
+	$: {
+		const pathname = $page.url.pathname;
+		if (pathname === '/' || pathname.includes(`/c/`)) {
+			pageType.set('chat');
+		} else if (pathname.includes(`/tools`)) {
+			pageType.set('tools')
+		} else if (pathname.includes(`/pdf`)) {
+			pageType.set('pdf')
+		}  else if (pathname.includes(`/translation`)) {
+			pageType.set('translation')
+		} else{
+			pageType.set('chat')
+		}
+	}
 
 	const setupSocket = async (enableWebsocket) => {
 		const _socket = io(`${WEBUI_BASE_URL}` || undefined, {

@@ -19,7 +19,8 @@
 		temporaryChatEnabled,
 		channels,
 		socket,
-		config
+		config,
+		pageType,
 	} from '$lib/stores';
 	import { onMount, getContext, tick, onDestroy } from 'svelte';
 
@@ -396,21 +397,7 @@
 		dropZone?.removeEventListener('dragleave', onDragLeave);
 	});
 
-	let pageType = 'chat';
-	$: {
-		const pathname = $page.url.pathname;
-		if (pathname === '/' || pathname.includes(`/c/`)) {
-			pageType = 'chat';
-		} else if (pathname.includes(`/tools`)) {
-			pageType = 'tools';
-		} else if (pathname.includes(`/pdf`)) {
-			pageType = 'pdf';
-		}  else if (pathname.includes(`/translation`)) {
-			pageType = 'translation';
-		} else{
-			pageType = 'chat';
-		}
-	}
+
 </script>
 
 <ArchivedChatsModal
@@ -675,7 +662,7 @@
 			</div>
 		{/if}
 		<div class=" flex-1 overflow-y-auto border-t pt-2 mt-2">
-			{#if pageType === 'chat'}
+			{#if $pageType === 'chat'}
 			<div class="relative {$temporaryChatEnabled ? 'opacity-20' : ''}">
 				{#if $temporaryChatEnabled}
 					<div class="absolute z-40 w-full h-full flex justify-center"></div>
@@ -953,10 +940,10 @@
 				</Folder>
 			</div>
 			{/if}
-			{#if pageType === 'pdf'}
+			{#if $pageType === 'pdf'}
 			<Pdf/>
 			{/if}
-			{#if pageType === 'translation'}
+			{#if $pageType === 'translation'}
 			<Pdf/>
 			{/if}
 		</div>
