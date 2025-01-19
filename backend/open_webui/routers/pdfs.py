@@ -349,7 +349,13 @@ def remove_file_from_folder_by_id(
     form_data: PdfFolderFileIdForm,
     user=Depends(get_verified_user),
 ):
+    if id.lower() == "null":
+        id = user.id
     m = Pdfs.get_folder_by_id(id=id)
+    if not m and id == user.id:
+        # 用当前用户 id 作为 folder_id 单独创建一个 folder
+        m = Pdfs.insert_special_folder(user.id, PdfFolderForm(name='-', description="empty"))
+
     if not m:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
