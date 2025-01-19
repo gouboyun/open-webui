@@ -43,7 +43,7 @@ def must_build_root_folder(
     if not m and id == user.id:
         # 用当前用户 id 作为 folder_id 单独创建一个 folder
         m = Pdfs.insert_special_folder(user.id, PdfFolderForm(name='-', description="empty"))
-    return m
+    return id, m
 
 
 @router.get("/", response_model=list[PdfFolderUserResponse])
@@ -158,7 +158,7 @@ class PdfFilesResponse(PdfFolderResponse):
 
 @router.get("/{id}", response_model=Optional[PdfFilesResponse])
 async def get_pdffolder_by_id(id: str, user=Depends(get_verified_user)):
-    m = must_build_root_folder(id, user)
+    id, m = must_build_root_folder(id, user)
 
     if m:
         file_ids = m.data.get("file_ids", []) if m.data else []
@@ -181,7 +181,7 @@ async def update_fodler_by_id(
     form_data: PdfFolderForm,
     user=Depends(get_verified_user),
 ):
-    m = must_build_root_folder(id, user)
+    id, m = must_build_root_folder(id, user)
     if not m:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -221,7 +221,7 @@ def add_file_to_folder_by_id(
     form_data: PdfFolderFileIdForm,
     user=Depends(get_verified_user),
 ):
-    m = must_build_root_folder(id, user)
+    id, m = must_build_root_folder(id, user)
     if not m:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -299,7 +299,7 @@ def update_file_from_folder_by_id(
     form_data: PdfFolderFileIdForm,
     user=Depends(get_verified_user),
 ):
-    m = must_build_root_folder(id, user)
+    id, m = must_build_root_folder(id, user)
     if not m:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -358,7 +358,7 @@ def remove_file_from_folder_by_id(
     form_data: PdfFolderFileIdForm,
     user=Depends(get_verified_user),
 ):
-    m = must_build_root_folder(id, user)
+    id, m = must_build_root_folder(id, user)
 
     if not m:
         raise HTTPException(
@@ -424,7 +424,7 @@ def remove_file_from_folder_by_id(
 
 @router.delete("/{id}/delete", response_model=bool)
 async def delete_folder_by_id(id: str, user=Depends(get_verified_user)):
-    m = must_build_root_folder(id, user)
+    id, m = must_build_root_folder(id, user)
     if not m:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -448,7 +448,7 @@ async def delete_folder_by_id(id: str, user=Depends(get_verified_user)):
 
 @router.post("/{id}/reset", response_model=Optional[PdfFolderResponse])
 async def reset_folder_by_id(id: str, user=Depends(get_verified_user)):
-    m = must_build_root_folder(id, user)
+    id, m = must_build_root_folder(id, user)
     if not m:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -482,7 +482,7 @@ def add_files_to_folder_batch(
     """
     Add multiple files to a folder, not working right now
     """
-    m = must_build_root_folder(id, user)
+    id, m = must_build_root_folder(id, user)
     if not m:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
