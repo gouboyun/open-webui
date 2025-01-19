@@ -10,7 +10,7 @@
 	import { blobToFile } from '$lib/utils';
 	import { uploadFile } from '$lib/apis/files';
 	import FileItem from '$lib/components/common/FileItem.svelte';
-	import { addFileToPdfById, deletePdfAll, getPdfList, removeFileToPdfById } from '$lib/apis/pdf';
+	import { addFileToPdfById, createPdfFolder, deletePdfAll, getPdfList, removeFileToPdfById } from '$lib/apis/pdf';
 
 	import AddContentMenu from '$lib/components/pdf/AddContentMenu.svelte';
 
@@ -49,22 +49,6 @@
 			return null;
 		}
 
-		// Check if the file is an audio file and transcribe/convert it to text file
-		// if (['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/x-m4a'].includes(file['type'])) {
-		// 	const res = await transcribeAudio(localStorage.token, file).catch((error) => {
-		// 		toast.error(error);
-		// 		return null;
-		// 	});
-
-		// 	if (res) {
-		// 		console.log(res);
-		// 		const blob = new Blob([res.text], { type: 'text/plain' });
-		// 		file = blobToFile(blob, `${file.name}.txt`);
-
-		// 		fileItem.name = file.name;
-		// 		fileItem.size = file.size;
-		// 	}
-		// }
 
 		try {
 			// During the file upload, file content is automatically extracted.
@@ -110,14 +94,6 @@
 		if(res){
 			await getFiles()
 		}
-
-		// if (updatedKnowledge) {
-		// 	knowledge = updatedKnowledge;
-		// 	toast.success($i18n.t('File added successfully.'));
-		// } else {
-		// 	toast.error($i18n.t('Failed to add file.'));
-		// 	knowledge.files = knowledge.files.filter((file) => file.id !== fileId);
-		// }
 	};
 
 	const deleteFileById = async (fileId)=>{
@@ -164,37 +140,16 @@
 				return;
 			}
 
-			// if (['image/gif', 'image/webp', 'image/jpeg', 'image/png'].includes(file['type'])) {
-			// 	if (visionCapableModels.length === 0) {
-			// 		toast.error($i18n.t('Selected model(s) do not support image inputs'));
-			// 		return;
-			// 	}
-			// 	let reader = new FileReader();
-			// 	reader.onload = async (event) => {
-			// 		let imageUrl = event.target.result;
 
-			// 		if ($settings?.imageCompression ?? false) {
-			// 			const width = $settings?.imageCompressionSize?.width ?? null;
-			// 			const height = $settings?.imageCompressionSize?.height ?? null;
-
-			// 			if (width || height) {
-			// 				imageUrl = await compressImage(imageUrl, width, height);
-			// 			}
-			// 		}
-
-			// 		files = [
-			// 			...files,
-			// 			{
-			// 				type: 'image',
-			// 				url: `${imageUrl}`
-			// 			}
-			// 		];
-			// 	};
-			// 	reader.readAsDataURL(file);
-			// } else {
 			uploadFileHandler(file);
-			//}
 		});
+	};
+
+	const createFolderHandler = async () => {
+		const res = await createPdfFolder(localStorage.token, 'bbb');
+		if (res) {
+			await getFiles();
+		}
 	};
 </script>
 
@@ -236,14 +191,10 @@
 						<div>
 							<AddContentMenu
 								on:upload={(e) => {
-									// if (e.detail.type === 'directory') {
-									// 	uploadDirectoryHandler();
-									// } else if (e.detail.type === 'text') {
-									// 	showAddTextContentModal = true;
-									// } else {
-									// 	document.getElementById('files-input').click();
-									// }
 									filesInputElement.click();
+								}}
+								on:create={(e) => {
+									createFolderHandler();
 								}}
 								on:sync={(e) => {
 									//showSyncConfirmModal = true;
@@ -253,30 +204,7 @@
 					</div>
 				</div>
 
-				<!-- {#if filteredItems.length > 0}
-					<div class=" flex overflow-y-auto h-full w-full scrollbar-hidden text-xs">
-						<Files
-							small
-							files={filteredItems}
-							{selectedFileId}
-							on:click={(e) => {
-								selectedFileId = selectedFileId === e.detail ? null : e.detail;
-							}}
-							on:delete={(e) => {
-								console.log(e.detail);
-
-								selectedFileId = null;
-								deleteFileHandler(e.detail);
-							}}
-						/>
-					</div>
-				{:else}
-					<div class="my-3 flex flex-col justify-center text-center text-gray-500 text-xs">
-						<div>
-							{$i18n.t('No content found')}
-						</div>
-					</div>
-				{/if} -->
+				
 			</div>
 		</div>
 	</div>
@@ -306,12 +234,4 @@
 	</div>
 	
 {/each}
-	<!-- <FileItem
-        item={file}
-        url={file.url}
-        name={file.name}
-        type={file.type}
-        size={file?.size}
-        colorClassName="bg-white dark:bg-gray-850 "
-    /> -->
 </div>
