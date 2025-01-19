@@ -268,7 +268,7 @@ def add_file_to_folder_by_id(
             file_ids.append(form_data.file_id)
             data["file_ids"] = file_ids
 
-            m = TranslationUserResponse.update_folder_data_by_id(id=id, data=data)
+            m = Translations.update_folder_data_by_id(id=id, data=data)
 
             if m:
                 files = Files.get_files_by_ids(file_ids)
