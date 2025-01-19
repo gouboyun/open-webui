@@ -26,6 +26,7 @@ class PdfFolder(Base):
     __tablename__ = "pdffolder"
 
     id = Column(Text, unique=True, primary_key=True)
+    parent_id = Column(Text, nullable=True)
     user_id = Column(Text)
 
     name = Column(Text)
@@ -42,6 +43,7 @@ class PdfFolderModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
+    parent_id: str
     user_id: str
 
     name: str
@@ -68,6 +70,7 @@ class PdfFolderUserResponse(PdfFolderUserModel):
 
 class PdfFolderForm(BaseModel):
     name: str
+    parent_id: str
     description: str
     data: Optional[dict] = None
 
