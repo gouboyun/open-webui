@@ -1874,6 +1874,27 @@
 		/>
 
 		<PaneGroup direction="horizontal" class="w-full h-full flex flex-row-reverse">
+			<ChatControls
+				bind:this={controlPaneComponent}
+				bind:history
+				bind:chatFiles
+				bind:params
+				bind:files
+				bind:pane={controlPane}
+				chatId={$chatId}
+				modelId={selectedModelIds?.at(0) ?? null}
+				models={selectedModelIds.reduce((a, e, i, arr) => {
+					const model = $models.find((m) => m.id === e);
+					if (model) {
+						return [...a, model];
+					}
+					return a;
+				}, [])}
+				{submitPrompt}
+				{stopResponse}
+				{showMessage}
+				{eventTarget}
+			/>
 			<Pane defaultSize={50} class="h-full flex w-full relative">
 				{#if $banners.length > 0 && !history.currentId && !$chatId && selectedModels.length <= 1}
 					<div class="absolute top-12 left-0 right-0 w-full z-30">
@@ -2020,27 +2041,7 @@
 				</div>
 			</Pane>
 
-			<ChatControls
-				bind:this={controlPaneComponent}
-				bind:history
-				bind:chatFiles
-				bind:params
-				bind:files
-				bind:pane={controlPane}
-				chatId={$chatId}
-				modelId={selectedModelIds?.at(0) ?? null}
-				models={selectedModelIds.reduce((a, e, i, arr) => {
-					const model = $models.find((m) => m.id === e);
-					if (model) {
-						return [...a, model];
-					}
-					return a;
-				}, [])}
-				{submitPrompt}
-				{stopResponse}
-				{showMessage}
-				{eventTarget}
-			/>
+			
 		</PaneGroup>
 	</div>
 {/if}
