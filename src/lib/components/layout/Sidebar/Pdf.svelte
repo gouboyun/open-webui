@@ -10,7 +10,7 @@
 	import { blobToFile } from '$lib/utils';
 	import { uploadFile } from '$lib/apis/files';
 	import FileItem from '$lib/components/common/FileItem.svelte';
-	import { addFileToPdfById, deletePdfAll, getPdfList } from '$lib/apis/pdf';
+	import { addFileToPdfById, deletePdfAll, getPdfList, removeFileToPdfById } from '$lib/apis/pdf';
 
 	import AddContentMenu from '$lib/components/pdf/AddContentMenu.svelte';
 
@@ -103,11 +103,11 @@
 	};
 
 	const addFileHandler = async (fileId) => {
-		const updatedKnowledge = await addFileToPdfById(localStorage.token, null, fileId).catch((e) => {
+		const res = await addFileToPdfById(localStorage.token, null, fileId).catch((e) => {
 			toast.error(e);
 			return null;
 		});
-		if(updatedKnowledge){
+		if(res){
 			await getFiles()
 		}
 
@@ -119,6 +119,16 @@
 		// 	knowledge.files = knowledge.files.filter((file) => file.id !== fileId);
 		// }
 	};
+
+	const deleteFileById = async (fileId)=>{
+		const res = await removeFileToPdfById(localStorage.token, null, fileId).catch((e) => {
+			toast.error(e);
+			return null;
+		});
+		if(res){
+			await getFiles()
+		}
+	}
 
 	const getFiles = async () => {
 		try {
@@ -275,7 +285,7 @@
 	{#each files as file, fileIdx}
 	<div class=" px-4">
 		<FileItem
-		className="w-full"
+		className="w-full mt-2"
 		item={file}
 		url={file?.url ? file.url : null}
 		name={file.meta.name}
@@ -283,6 +293,7 @@
 		size={file?.meta.size}
 		dismissible={true}
 		on:dismiss={() => {
+			deleteFileById(file.id)
 			// Remove the file from the chatFiles array
 
 			// chatFiles.splice(fileIdx, 1);

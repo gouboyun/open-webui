@@ -45,7 +45,7 @@
 {/if}
 
 <button
-	class="relative group p-1.5 {className} flex items-center gap-1 {colorClassName} {small
+	class="hover:border hover:border-blue-400 relative group p-1.5 {className} flex items-center gap-1 {colorClassName} {small
 		? 'rounded-xl'
 		: 'rounded-2xl'} text-left"
 	type="button"

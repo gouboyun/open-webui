@@ -142,7 +142,7 @@
 		<div class="w-full flex flex-col justify-center items-center">
 			<div class='text-4xl mb-2 flex items-center'>
 				<img src={logoImg} alt="logo"  class=" w-12 h-12 mr-4"/>
-				南京邮电大学AI大模型管理台</div>
+				南京邮电大学AI大模型</div>
 			<!-- <div class="flex flex-row justify-center gap-3 sm:gap-3.5 w-fit px-5">
 				<div class="flex flex-shrink-0 justify-center">
 					<div class="flex -space-x-4 mb-0.5" in:fade={{ duration: 100 }}>
