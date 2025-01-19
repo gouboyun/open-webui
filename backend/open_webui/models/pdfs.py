@@ -43,7 +43,7 @@ class PdfFolderModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
-    parent_id: str
+    parent_id: Optional[str] = None
     user_id: str
 
     name: str
@@ -70,8 +70,8 @@ class PdfFolderUserResponse(PdfFolderUserModel):
 
 class PdfFolderForm(BaseModel):
     name: str
-    parent_id: str
     description: str
+    parent_id: Optional[str] = None
     data: Optional[dict] = None
 
 
