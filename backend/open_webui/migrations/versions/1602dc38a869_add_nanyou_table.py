@@ -22,6 +22,7 @@ def upgrade():
     op.create_table(
         "pdffolder",
         sa.Column("id", sa.Text(), primary_key=True),
+        sa.Column("parent_id", sa.Text(), nullable=True),
         sa.Column("user_id", sa.Text(), nullable=False),
         sa.Column("name", sa.Text(), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
