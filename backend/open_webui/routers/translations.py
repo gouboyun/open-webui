@@ -398,7 +398,7 @@ def remove_file_from_folder_by_id(
             file_ids.remove(form_data.file_id)
             data["file_ids"] = file_ids
 
-            m = TranslationUserResponse.update_folder_data_by_id(id=id, data=data)
+            m = Translations.update_folder_data_by_id(id=id, data=data)
 
             if m:
                 files = Files.get_files_by_ids(file_ids)
