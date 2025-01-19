@@ -31,7 +31,20 @@ def upgrade():
         sa.Column("created_at", sa.BigInteger(), nullable=False),
         sa.Column("updated_at", sa.BigInteger(), nullable=True),
     )
+    op.create_table(
+        "translation",
+        sa.Column("id", sa.Text(), primary_key=True),
+        sa.Column("parent_id", sa.Text(), nullable=True),
+        sa.Column("user_id", sa.Text(), nullable=False),
+        sa.Column("name", sa.Text(), nullable=False),
+        sa.Column("description", sa.Text(), nullable=True),
+        sa.Column("data", sa.JSON(), nullable=True),
+        sa.Column("meta", sa.JSON(), nullable=True),
+        sa.Column("created_at", sa.BigInteger(), nullable=False),
+        sa.Column("updated_at", sa.BigInteger(), nullable=True),
+    )
 
 
 def downgrade():
     op.drop_table("pdffolder")
+    op.drop_table("translation")
