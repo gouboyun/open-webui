@@ -70,7 +70,7 @@ class PdfFolderUserResponse(PdfFolderUserModel):
 
 class PdfFolderForm(BaseModel):
     name: str
-    description: str
+    description: Optional[str] = None
     parent_id: Optional[str] = None
     data: Optional[dict] = None
 
