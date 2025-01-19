@@ -58,6 +58,7 @@
 	import ChannelModal from './Sidebar/ChannelModal.svelte';
 	import ChannelItem from './Sidebar/ChannelItem.svelte';
 	import PencilSquare from '../icons/PencilSquare.svelte';
+	import Translation from './Sidebar/Translation.svelte';
 
 	const BREAKPOINT = 768;
 
@@ -946,7 +947,7 @@
 			<Pdf/>
 			{/if}
 			{#if $pageType === 'translation'}
-			<Pdf/>
+			<Translation/>
 			{/if}
 		</div>
 		

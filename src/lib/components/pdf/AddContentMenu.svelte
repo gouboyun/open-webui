@@ -73,7 +73,7 @@
 				}}
 			>
 				<FolderOpen strokeWidth="2" />
-				<div class="flex items-center">{$i18n.t('Upload directory')}</div>
+				<div class="flex items-center">{$i18n.t('New Folder')}</div>
 			</DropdownMenu.Item>
 		</DropdownMenu.Content>
 	</div>
