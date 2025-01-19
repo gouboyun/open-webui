@@ -11,6 +11,7 @@
 		showOverview,
 		showArtifacts,
 		showFileView,
+		showTranslationView
 	} from '$lib/stores';
 
 	import Modal from '../common/Modal.svelte';
@@ -19,6 +20,7 @@
 	import Drawer from '../common/Drawer.svelte';
 	import Overview from './Overview.svelte';
 	import FileView from './FileView.svelte';
+	import FileTranslationView from './FileTranslationView.svelte';
 	import EllipsisVertical from '../icons/EllipsisVertical.svelte';
 	import Artifacts from './Artifacts.svelte';
 	import { min } from '@floating-ui/utils';
@@ -260,6 +262,8 @@
 							<Artifacts {history} overlay={dragged} />
 						{:else if $showFileView}
 							<FileView />
+						{:else if $showTranslationView}
+							<FileTranslationView />
 						{:else if $showOverview}
 							<Overview
 								{history}
