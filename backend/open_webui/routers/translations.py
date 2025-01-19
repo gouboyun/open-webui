@@ -48,7 +48,7 @@ def must_build_root_folder(
     return id, m
 
 
-@router.get("/", response_model=list[TranslationUserResponse]):
+@router.get("/", response_model=list[TranslationUserResponse])
 async def get_translations(user=Depends(get_verified_user)):
     arr1 = Translations.get_folders_by_user_id(user.id)
 
@@ -621,9 +621,9 @@ def batch_del_all_folders(
 #             #         response.raise_for_status()
 #             #         data = await response.json()
 
-        except Exception as e:
-            log.exception(e)
-            return {"msg": str(e.args)}
+        # except Exception as e:
+        #     log.exception(e)
+        #     return {"msg": str(e.args)}
         
         # contents, file_path = Storage.upload_file(file.file, filename)
 
@@ -664,9 +664,9 @@ def batch_del_all_folders(
         #         detail=ERROR_MESSAGES.DEFAULT("Error uploading file"),
         #     )
 
-    except Exception as e:
-        log.exception(e)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ERROR_MESSAGES.DEFAULT(e),
-        )
+    # except Exception as e:
+    #     log.exception(e)
+    #     raise HTTPException(
+    #         status_code=status.HTTP_400_BAD_REQUEST,
+    #         detail=ERROR_MESSAGES.DEFAULT(e),
+    #     )
