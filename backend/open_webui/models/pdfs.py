@@ -30,7 +30,7 @@ class PdfFolder(Base):
     user_id = Column(Text)
 
     name = Column(Text)
-    description = Column(Text)
+    description = Column(Text, nullable=True)
 
     data = Column(JSON, nullable=True)
     meta = Column(JSON, nullable=True)
@@ -47,7 +47,7 @@ class PdfFolderModel(BaseModel):
     user_id: str
 
     name: str
-    description: str
+    description: Optional[str]
 
     data: Optional[dict] = None
     meta: Optional[dict] = None
