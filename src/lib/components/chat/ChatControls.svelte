@@ -261,8 +261,7 @@
 						{:else if $showArtifacts}
 							<Artifacts {history} overlay={dragged} />
 						{:else if $showFileView}
-							<!-- <FileView /> -->
-						<FileTranslationView />
+							<FileView />
 						{:else if $showTranslationView}
 							<FileTranslationView />
 						{:else if $showOverview}

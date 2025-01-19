@@ -13,12 +13,8 @@
 		showOverview,
 		showArtifacts,
 		currentFileId,
-
 		pageType,
-
 		showTranslationView
-
-
 	} from '$lib/stores';
 
 	const i18n = getContext('i18n');
@@ -56,22 +52,24 @@
 		: 'rounded-2xl'} text-left"
 	type="button"
 	on:click={async () => {
-		if (item?.file?.meta?.content_type === 'application/pdf' ||
-		item?.meta?.content_type === 'application/pdf'
+		if (
+			item?.file?.meta?.content_type === 'application/pdf' ||
+			item?.meta?.content_type === 'application/pdf'
 		) {
-			// // 重置pdf 文件预览 pane 宽度
-			if (controlPane) {
+		    // 重置pdf 文件预览宽度
+			if ($pageType === 'translation') {
+				localStorage.chatControlsSize = 70;
+			} else {
 				localStorage.chatControlsSize = 50;
-				controlPane.resize(50);
 			}
-			currentFileId.set(item.id);
-			showControls.set(true);
-			if($pageType === 'translation'){
-				showTranslationView.set(true)
-			}else{
+			await currentFileId.set(item.id);
+			await showControls.set(true);
+			if ($pageType === 'translation') {
+				showTranslationView.set(true);
+			} else {
 				showFileView.set(true);
 			}
-			
+
 			showArtifacts.set(false);
 			showOverview.set(false);
 			return;
