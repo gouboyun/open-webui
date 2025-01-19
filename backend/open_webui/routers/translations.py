@@ -118,7 +118,7 @@ async def get_folder_list(user=Depends(get_verified_user)):
                         file_ids.remove(missing_file)
 
                     data["file_ids"] = file_ids
-                    TranslationUserResponse.update_folder_data_by_id(
+                    Translations.update_folder_data_by_id(
                         id=item.id, data=data
                     )
 
@@ -142,7 +142,7 @@ async def get_folder_list(user=Depends(get_verified_user)):
 async def create_new_pdffolder(
     request: Request, form_data: TranslationForm, user=Depends(get_verified_user)
 ):
-    m = TranslationUserResponse.insert_new_folder(user.id, form_data)
+    m = Translations.insert_new_folder(user.id, form_data)
 
     if m:
         return m
@@ -196,7 +196,7 @@ async def update_fodler_by_id(
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
         )
 
-    m = TranslationUserResponse.update_folder_data_by_id(id=id, form_data=form_data)
+    m = Translations.update_folder_data_by_id(id=id, form_data=form_data)
     if m:
         file_ids = m.data.get("file_ids", []) if m.data else []
         files = Files.get_files_by_ids(file_ids)
@@ -444,7 +444,7 @@ async def delete_folder_by_id(id: str, user=Depends(get_verified_user)):
     except Exception as e:
         log.debug(e)
         pass
-    result = TranslationUserResponse.delete_folder_by_id(id=id)
+    result = Translations.delete_folder_by_id(id=id)
     return result
 
 
@@ -469,7 +469,7 @@ async def reset_folder_by_id(id: str, user=Depends(get_verified_user)):
         log.debug(e)
         pass
 
-    m = TranslationUserResponse.update_folder_data_by_id(id=id, data={"file_ids": []})
+    m = Translations.update_folder_data_by_id(id=id, data={"file_ids": []})
 
     return m
 
@@ -533,7 +533,7 @@ def add_files_to_folder_batch(
             existing_file_ids.append(file_id)
 
     data["file_ids"] = existing_file_ids
-    m = TranslationUserResponse.update_folder_data_by_id(id=id, data=data)
+    m = Translations.update_folder_data_by_id(id=id, data=data)
 
     # If there were any errors, include them in the response
     if result.errors:
@@ -560,7 +560,7 @@ def batch_del_all_folders(
     """
     batch delete all folders
     """
-    TranslationUserResponse.delete_all_folder_by_uid(user.id)
+    Translations.delete_all_folder_by_uid(user.id)
     return {}
 
 
