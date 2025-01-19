@@ -376,9 +376,13 @@ def remove_file_from_folder_by_id(
         )
 
     # Remove content from the vector database
-    VECTOR_DB_CLIENT.delete(
-        collection_name=m.id, filter={"file_id": form_data.file_id}
-    )
+    try:
+        VECTOR_DB_CLIENT.delete(
+            collection_name=m.id, filter={"file_id": form_data.file_id}
+        )
+    except Exception as e:
+        log.debug("remove from vector db failed")
+        pass
 
     if m:
         data = m.data or {}
@@ -447,7 +451,7 @@ async def reset_folder_by_id(id: str, user=Depends(get_verified_user)):
             detail=ERROR_MESSAGES.NOT_FOUND,
         )
 
-    if m.user_id != user.id and user.role != "admin":
+    if m.user_id != user.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
@@ -472,7 +476,7 @@ def add_files_to_folder_batch(
     user=Depends(get_verified_user),
 ):
     """
-    Add multiple files to a folder
+    Add multiple files to a folder, not working right now
     """
     m = Pdfs.get_folder_by_id(id=id)
     if not m:
@@ -481,7 +485,7 @@ def add_files_to_folder_batch(
             detail=ERROR_MESSAGES.NOT_FOUND,
         )
 
-    if m.user_id != user.id and user.role != "admin":
+    if m.user_id != user.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
