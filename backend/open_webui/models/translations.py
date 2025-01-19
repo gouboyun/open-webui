@@ -1,157 +1,210 @@
+import logging
 import time
 import uuid
 from typing import Optional
 
-from open_webui.internal.db import Base, get_db
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy import BigInteger, Column, String, Text, JSON
+from sqlalchemy import BigInteger, Column, Text, JSON, Boolean
+
+from open_webui.internal.db import Base, get_db
+from open_webui.models.files import FileMetadataResponse
+from open_webui.models.users import Users, UserResponse
+
+
+from open_webui.env import SRC_LOG_LEVELS
+
+log = logging.getLogger(__name__)
+log.setLevel(SRC_LOG_LEVELS["MODELS"])
 
 
 ####################
-# Memory DB Schema
-####################   
+# Translation DB Schema
+####################
 
 class Translation(Base):
     __tablename__ = "translation"
 
-    id = Column(String, primary_key=True)
-    user_id = Column(String)
-    
-    fid = Column(String)
-    tran_fid = Column(String)
+    id = Column(Text, unique=True, primary_key=True)
+    parent_id = Column(Text, nullable=True)
+    user_id = Column(Text)
 
-    lang = Column(String, nullable=True)
-    trans_lang = Column(String, nullable=True)
+    name = Column(Text)
+    description = Column(Text, nullable=True)
 
-    access_control = Column(JSON, nullable=True)
+    data = Column(JSON, nullable=True)
+    meta = Column(JSON, nullable=True)
 
     created_at = Column(BigInteger)
     updated_at = Column(BigInteger)
 
 
 class TranslationModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
-    user_id: str
-    
-    fid: str
-    tran_fid: str
-    path: Optional[str] = None
-
-    translated: Optional[dict] = None
-    access_control: Optional[dict] = None
-
-    created_at: Optional[int]  # timestamp in epoch
-    updated_at: Optional[int]  # timestamp in epoch
-
-
-class TranslationModelResponse(BaseModel):
-    id: str
+    parent_id: Optional[str] = None
     user_id: str
 
-    # meta: FileMeta
+    name: str
+    description: Optional[str]
+
+    data: Optional[dict] = None
+    meta: Optional[dict] = None
 
     created_at: int  # timestamp in epoch
     updated_at: int  # timestamp in epoch
 
-    model_config = ConfigDict(extra="allow")
 
-####################
-# Forms
-####################
+class TranslationUserModel(TranslationModel):
+    user: Optional[UserResponse] = None
+
+class TranslationResponse(TranslationModel):
+    files: Optional[list[FileMetadataResponse | dict]] = None
+    
+class TranslationUserResponse(TranslationUserModel):
+    files: Optional[list[FileMetadataResponse | dict]] = None
 
 
-class TranslationsTable:
-    def insert_new_translation(
-        self,
-        user_id: str,
-        content: str,
-    ) -> Optional[TranslationModel]:
+class TranslationForm(BaseModel):
+    name: str
+    description: Optional[str] = None
+    parent_id: Optional[str] = None
+    data: Optional[dict] = None
+
+
+
+
+class TranslationTable:
+    
+    def insert_special_folder(
+        self, user_id: str, form_data: TranslationForm
+    ):
         with get_db() as db:
-            id = str(uuid.uuid4())
-
             m = TranslationModel(
                 **{
-                    "id": id,
+                    **form_data.model_dump(),
+                    "id": user_id,
                     "user_id": user_id,
                     "created_at": int(time.time()),
                     "updated_at": int(time.time()),
                 }
             )
-            result = Translation(**m.model_dump())
-            db.add(result)
-            db.commit()
-            db.refresh(result)
-            if result:
-                return TranslationModel.model_validate(result)
-            else:
-                return None
 
-    def update_translation_by_id(
-        self,
-        id: str,
-        translated: dict,
+            try:
+                result = Translation(**m.model_dump())
+                db.add(result)
+                db.commit()
+                db.refresh(result)
+                if result:
+                    return TranslationModel.model_validate(result)
+                else:
+                    return None
+            except Exception:
+                return None
+        
+    def insert_new_folder(
+        self, user_id: str, form_data: TranslationForm
     ) -> Optional[TranslationModel]:
         with get_db() as db:
+            m = TranslationModel(
+                **{
+                    **form_data.model_dump(),
+                    "id": str(uuid.uuid4()),
+                    "user_id": user_id,
+                    "created_at": int(time.time()),
+                    "updated_at": int(time.time()),
+                }
+            )
+
             try:
-                db.query(Translation).filter_by(id=id).update(
+                result = Translation(**m.model_dump())
+                db.add(result)
+                db.commit()
+                db.refresh(result)
+                if result:
+                    return TranslationModel.model_validate(result)
+                else:
+                    return None
+            except Exception:
+                return None
+
+    def get_folders_by_user_id(
+        self, user_id: str
+    ) -> list[TranslationUserModel]:
+        with get_db() as db:
+            arr = []
+            for i in (
+                db.query(Translation).filter_by(user_id=user_id). \
+                    order_by(Translation.updated_at.desc()).all()
+                ):
+                user = Users.get_user_by_id(i.user_id)
+                arr.append(
+                    TranslationUserModel.model_validate(
+                        {
+                            **TranslationModel.model_validate(i).model_dump(),
+                            "user": user.model_dump() if user else None,
+                        },
+                    )
+                )
+            return arr
+
+    def get_folder_by_id(self, id: str) -> Optional[TranslationModel]:
+        try:
+            with get_db() as db:
+                m = db.query(Translation).filter_by(id=id).first()
+                return TranslationModel.model_validate(m) if m else None
+        except Exception:
+            return None
+
+    def update_folder_by_id(
+        self, id: str, form_data: TranslationForm, overwrite: bool = False
+    ) -> Optional[TranslationModel]:
+        try:
+            with get_db() as db:
+                m = self.get_folder_by_id(id=id)
+                db.query(m).filter_by(id=id).update(
                     {
-                        "translated": translated, 
-                     "updated_at": int(time.time())}
+                        **form_data.model_dump(),
+                        "updated_at": int(time.time()),
+                    }
                 )
                 db.commit()
-                return self.get_memory_by_id(id)
-            except Exception:
-                return None
+                return self.get_folder_by_id(id=id)
+        except Exception as e:
+            log.exception(e)
+            return None
 
-    def get_translations(self) -> list[TranslationModel]:
-        with get_db() as db:
-            try:
-                arr = db.query(Translation).all()
-                return [TranslationModel.model_validate(v) for v in arr]
-            except Exception:
-                return None
+    def update_folder_data_by_id(
+        self, id: str, data: dict
+    ) -> Optional[TranslationModel]:
+        try:
+            with get_db() as db:
+                m = self.get_folder_by_id(id=id)
+                db.query(Translation).filter_by(id=id).update(
+                    {
+                        "data": data,
+                        "updated_at": int(time.time()),
+                    }
+                )
+                db.commit()
+                return self.get_folder_by_id(id=id)
+        except Exception as e:
+            log.exception(e)
+            return None
 
-    def get_translations_by_user_id(self, user_id: str) -> list[TranslationModel]:
-        with get_db() as db:
-            try:
-                arr = db.query(Translation).filter_by(user_id=user_id).all()
-                return [TranslationModel.model_validate(v) for v in arr]
-            except Exception:
-                return None
-
-    def get_translation_by_id(self, id: str) -> Optional[TranslationModel]:
-        with get_db() as db:
-            try:
-                v = db.get(Translation, id)
-                return TranslationModel.model_validate(v)
-            except Exception:
-                return None
-
-    def delete_translation_by_id(self, id: str) -> bool:
-        with get_db() as db:
-            try:
+    def delete_folder_by_id(self, id: str) -> bool:
+        try:
+            with get_db() as db:
                 db.query(Translation).filter_by(id=id).delete()
                 db.commit()
-
                 return True
+        except Exception:
+            return False
 
-            except Exception:
-                return False
-
-    def delete_translations_by_user_id(self, user_id: str) -> bool:
+    def delete_all_folder_by_uid(self, uid: str) -> bool:
         with get_db() as db:
             try:
-                db.query(Translation).filter_by(user_id=user_id).delete()
-                db.commit()
-
-                return True
-            except Exception:
-                return False
-
-    def delete_translation_by_id_and_user_id(self, id: str, user_id: str) -> bool:
-        with get_db() as db:
-            try:
-                db.query(Translation).filter_by(id=id, user_id=user_id).delete()
+                db.query(Translation).filter(user_id = uid).delete()
                 db.commit()
 
                 return True
@@ -159,4 +212,4 @@ class TranslationsTable:
                 return False
 
 
-Translations = TranslationsTable()
+Translations = TranslationTable()
