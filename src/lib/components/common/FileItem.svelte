@@ -12,7 +12,13 @@
 		showFileView,
 		showOverview,
 		showArtifacts,
-		currentFileId
+		currentFileId,
+
+		pageType,
+
+		showTranslationView
+
+
 	} from '$lib/stores';
 
 	const i18n = getContext('i18n');
@@ -60,7 +66,12 @@
 			}
 			currentFileId.set(item.id);
 			showControls.set(true);
-			showFileView.set(true);
+			if($pageType === 'translation'){
+				showTranslationView.set(true)
+			}else{
+				showFileView.set(true);
+			}
+			
 			showArtifacts.set(false);
 			showOverview.set(false);
 			return;
