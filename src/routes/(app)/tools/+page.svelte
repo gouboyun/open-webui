@@ -5,7 +5,8 @@
 	let tools = [
 		{
 			icon: 'carbon:report',
-			title: '公文写手'
+			title: '公文写手',
+			link: '/tools/doc'
 		},
 		{
 			icon: 'carbon:report',
@@ -14,27 +15,36 @@
 		},
 		{
 			icon: 'carbon:report',
-			title: '核稿工具'
+			title: '核稿工具',
+			link: '/tools/proof' 
 		},
 		{
 			icon: 'carbon:report',
-			title: '文章润色'
+			title: '文章润色',
+			link: '/tools/polish' 
 		},
 		{
 			icon: 'carbon:report',
-			title: 'ppt内容生成器'
+			title: 'ppt内容生成器',
+			link: '/tools/pptGenerator' 
 		},
 		{
 			icon: 'carbon:report',
-			title: '中英互译'
+			title: '中英互译',
+			link: '/tools/translation' 
+			
 		},
 		{
 			icon: 'carbon:report',
-			title: '文章续写'
+			title: '文章续写',
+			link: '/tools/continueArticle' 
+			
 		},
 		{
 			icon: 'carbon:report',
-			title: '心理健康导师'
+			title: '心理健康导师',
+			link: '/tools/psychologist' 
+			
 		}
 	];
 
