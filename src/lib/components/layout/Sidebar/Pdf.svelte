@@ -10,13 +10,19 @@
 	import { blobToFile } from '$lib/utils';
 	import { uploadFile } from '$lib/apis/files';
 	import FileItem from '$lib/components/common/FileItem.svelte';
-	import { addFileToPdfById, createPdfFolder, deletePdfAll, getPdfList, removeFileToPdfById } from '$lib/apis/pdf';
+	import {
+		addFileToPdfById,
+		createPdfFolder,
+		deletePdfAll,
+		getPdfList,
+		removeFileToPdfById
+	} from '$lib/apis/pdf';
 
 	import AddContentMenu from '$lib/components/pdf/AddContentMenu.svelte';
 
 	onMount(async () => {
 		//await deletePdfAll(localStorage.token);
-		await getFiles()
+		await getFiles();
 	});
 	const i18n = getContext('i18n');
 	let filesInputElement;
@@ -48,7 +54,6 @@
 			toast.error($i18n.t('You cannot upload an empty file.'));
 			return null;
 		}
-
 
 		try {
 			// During the file upload, file content is automatically extracted.
@@ -91,25 +96,25 @@
 			toast.error(e);
 			return null;
 		});
-		if(res){
-			await getFiles()
+		if (res) {
+			await getFiles();
 		}
 	};
 
-	const deleteFileById = async (fileId)=>{
+	const deleteFileById = async (fileId) => {
 		const res = await removeFileToPdfById(localStorage.token, null, fileId).catch((e) => {
 			toast.error(e);
 			return null;
 		});
-		if(res){
-			await getFiles()
+		if (res) {
+			await getFiles();
 		}
-	}
+	};
 
 	const getFiles = async () => {
 		try {
 			const res = await getPdfList(localStorage.token);
-			files = res[0].files;
+			files = res;
 		} catch (e) {
 			files = [];
 		}
@@ -140,13 +145,12 @@
 				return;
 			}
 
-
 			uploadFileHandler(file);
 		});
 	};
 
 	const createFolderHandler = async () => {
-		const res = await createPdfFolder(localStorage.token, 'bbb');
+		const res = await createPdfFolder(localStorage.token, 'ccc');
 		if (res) {
 			await getFiles();
 		}
@@ -154,7 +158,6 @@
 </script>
 
 <div class="relative">
-
 	<input
 		bind:this={filesInputElement}
 		bind:files={inputFiles}
@@ -203,35 +206,36 @@
 						</div>
 					</div>
 				</div>
-
-				
 			</div>
 		</div>
 	</div>
 
-	
 	{#each files as file, fileIdx}
-	<div class=" px-4">
-		<FileItem
-		className="w-full mt-2"
-		item={file}
-		url={file?.url ? file.url : null}
-		name={file.meta.name}
-		type={file.meta.content_type}
-		size={file?.meta.size}
-		dismissible={true}
-		on:dismiss={() => {
-			deleteFileById(file.id)
-			// Remove the file from the chatFiles array
-
-			// chatFiles.splice(fileIdx, 1);
-			// chatFiles = chatFiles;
-		}}
-		on:click={() => {
-			console.log(file);
-		}}
-	/>
-	</div>
-	
-{/each}
+		
+		{#if file.name !== '-'}
+			<div class="px-4">
+				{file.name} 
+			</div>
+		{:else}
+			{#each file.files as node}
+			<div class=" px-4">
+				<FileItem
+					className="w-full mt-2"
+					item={node}
+					url={node?.url ? node.url : null}
+					name={node.meta.name}
+					type={node.meta.content_type}
+					size={node?.meta.size}
+					dismissible={true}
+					on:dismiss={() => {
+						deleteFileById(node.id);
+					}}
+					on:click={() => {
+						console.log(node);
+					}}
+				/>
+			</div>
+			{/each}
+		{/if}
+	{/each}
 </div>
