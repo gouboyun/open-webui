@@ -15,7 +15,7 @@
 		createPdfFolder,
 		deletePdfAll,
 		getPdfList,
-		removeFileToPdfById
+		removePdfFileById
 	} from '$lib/apis/pdf';
 
 	import AddContentMenu from '$lib/components/pdf/AddContentMenu.svelte';

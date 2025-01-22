@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { addFileToPdfById, removeFileToPdfById } from '$lib/apis/pdf';
+	import { addFileToPdfById, removePdfFileById, removePdfFolderById } from '$lib/apis/pdf';
 	import FileItem from '$lib/components/common/FileItem.svelte';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { toast } from 'svelte-sonner';
@@ -25,7 +25,17 @@
 	const dispatch = createEventDispatcher();
 
 	const deleteFileById = async (fileId) => {
-		const res = await removeFileToPdfById(localStorage.token, folder?.id, fileId).catch((e) => {
+		const res = await removePdfFileById(localStorage.token, folder?.id, fileId).catch((e) => {
+			toast.error(e);
+			return null;
+		});
+		if (res) {
+			dispatch('change');
+		}
+	};
+
+	const deleteFolder = async () => {
+		const res = await removePdfFolderById(localStorage.token, folder?.id).catch((e) => {
 			toast.error(e);
 			return null;
 		});
@@ -149,13 +159,13 @@
 	bind:show={showDeleteConfirm}
 	title={$i18n.t('Delete folder?')}
 	on:confirm={() => {
-		//deleteHandler();
+		deleteFolder()
 	}}
 >
 	<div class=" text-sm text-gray-700 dark:text-gray-300 flex-1 line-clamp-3">
 		{@html DOMPurify.sanitize(
 			$i18n.t('This will delete <strong>{{NAME}}</strong> and <strong>all its contents</strong>.', {
-				NAME: 'folders[folderId].name'
+				NAME: folder?.name
 			})
 		)}
 	</div>
