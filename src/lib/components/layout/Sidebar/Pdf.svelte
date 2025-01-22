@@ -19,7 +19,7 @@
 	} from '$lib/apis/pdf';
 
 	import AddContentMenu from '$lib/components/pdf/AddContentMenu.svelte';
-
+	import PdfFolder from './PdfFolder.svelte';
 	onMount(async () => {
 		//await deletePdfAll(localStorage.token);
 		await getFiles();
@@ -27,7 +27,7 @@
 	const i18n = getContext('i18n');
 	let filesInputElement;
 	let inputFiles;
-	let files: any[] = [];
+	let pdfFolders: any[] = [];
 
 	const uploadFileHandler = async (file, fullContext: boolean = false) => {
 		if ($_user?.role !== 'admin' && !($_user?.permissions?.chat?.file_upload ?? true)) {
@@ -74,20 +74,11 @@
 				await addFileHandler(uploadedFile.id);
 				// 文件上传成功后，自动触发pdf文件内容预览
 
-				// fileItem.status = 'uploaded';
-				// fileItem.file = uploadedFile;
-				// fileItem.id = uploadedFile.id;
-				// fileItem.collection_name =
-				// 	uploadedFile?.meta?.collection_name || uploadedFile?.collection_name;
-				// fileItem.url = `${WEBUI_API_BASE_URL}/files/${uploadedFile.id}`;
 
-				//files = files;
 			} else {
-				//files = files.filter((item) => item?.itemId !== tempItemId);
 			}
 		} catch (e) {
 			toast.error(e);
-			//files = files.filter((item) => item?.itemId !== tempItemId);
 		}
 	};
 
@@ -101,22 +92,14 @@
 		}
 	};
 
-	const deleteFileById = async (fileId) => {
-		const res = await removeFileToPdfById(localStorage.token, null, fileId).catch((e) => {
-			toast.error(e);
-			return null;
-		});
-		if (res) {
-			await getFiles();
-		}
-	};
+	
 
 	const getFiles = async () => {
 		try {
 			const res = await getPdfList(localStorage.token);
-			files = res;
+			pdfFolders = res;
 		} catch (e) {
-			files = [];
+			pdfFolders = [];
 		}
 	};
 	const inputFilesHandler = async (_files) => {
@@ -150,7 +133,7 @@
 	};
 
 	const createFolderHandler = async () => {
-		const res = await createPdfFolder(localStorage.token, 'ccc');
+		const res = await createPdfFolder(localStorage.token, 'ddd');
 		if (res) {
 			await getFiles();
 		}
@@ -210,32 +193,8 @@
 		</div>
 	</div>
 
-	{#each files as file, fileIdx}
-		
-		{#if file.name !== '-'}
-			<div class="px-4">
-				{file.name} 
-			</div>
-		{:else}
-			{#each file.files as node}
-			<div class=" px-4">
-				<FileItem
-					className="w-full mt-2"
-					item={node}
-					url={node?.url ? node.url : null}
-					name={node.meta.name}
-					type={node.meta.content_type}
-					size={node?.meta.size}
-					dismissible={true}
-					on:dismiss={() => {
-						deleteFileById(node.id);
-					}}
-					on:click={() => {
-						console.log(node);
-					}}
-				/>
-			</div>
-			{/each}
-		{/if}
+	{#each pdfFolders as folder, fileIdx}
+		<PdfFolder {folder} on:change={getFiles}/>
 	{/each}
+	
 </div>
