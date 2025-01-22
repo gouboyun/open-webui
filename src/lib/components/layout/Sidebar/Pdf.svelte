@@ -1,21 +1,14 @@
 <script lang="ts">
 	import { getContext, onMount } from 'svelte';
 	import SearchInput from './SearchInput.svelte';
-	import DocumentArrowUpSolid from '$lib/components/icons/DocumentArrowUpSolid.svelte';
 	import { config, user as _user } from '$lib/stores';
 	import { v4 as uuidv4 } from 'uuid';
 	import { toast } from 'svelte-sonner';
-	import { WEBUI_API_BASE_URL } from '$lib/constants';
-	import { transcribeAudio } from '$lib/apis/audio';
-	import { blobToFile } from '$lib/utils';
 	import { uploadFile } from '$lib/apis/files';
-	import FileItem from '$lib/components/common/FileItem.svelte';
 	import {
 		addFileToPdfById,
 		createPdfFolder,
-		deletePdfAll,
 		getPdfList,
-		removePdfFileById
 	} from '$lib/apis/pdf';
 
 	import AddContentMenu from '$lib/components/pdf/AddContentMenu.svelte';
