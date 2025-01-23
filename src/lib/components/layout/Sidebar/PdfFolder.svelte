@@ -11,6 +11,7 @@
 	import DOMPurify from 'dompurify';
 	import { DropdownMenu } from 'bits-ui';
 	import ArrowUpCircle from '$lib/components/icons/ArrowUpCircle.svelte';
+	import ChatBubble from '$lib/components/icons/ChatBubble.svelte';
 	import { config, user as _user } from '$lib/stores';
 	import { v4 as uuidv4 } from 'uuid';
 	import { uploadFile } from '$lib/apis/files';
@@ -31,6 +32,7 @@
 		});
 		if (res) {
 			dispatch('change');
+			toast.success($i18n.t('Success'));
 		}
 	};
 
@@ -41,6 +43,7 @@
 		});
 		if (res) {
 			dispatch('change');
+			toast.success($i18n.t('Success'));
 		}
 	};
 
@@ -102,6 +105,7 @@
 		});
 		if (res) {
 			dispatch('change');
+			toast.success($i18n.t('Success'));
 			//await getFiles();
 		}
 	};
@@ -173,7 +177,8 @@
 
 <div class=" w-full">
 	{#if folder.name !== '-'}
-		<button
+		<div class="  border-b py-2">
+			<button
 			class="px-4 py-2 hover:bg-gray-100 w-full flex items-center mt-1 cursor-pointer group"
 			on:click={() => {
 				open = !open;
@@ -212,6 +217,16 @@
 						<DropdownMenu.Item
 							class="flex gap-2 items-center px-3 py-1.5 text-sm  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
 							on:click={() => {
+								// TODO:
+							}}
+						>
+							<ChatBubble strokeWidth="2" />
+							<div class="flex items-center">Chat 目录</div>
+						</DropdownMenu.Item>
+
+						<DropdownMenu.Item
+							class="flex gap-2 items-center px-3 py-1.5 text-sm  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
+							on:click={() => {
 								//dispatch('rename');
 								filesInputElement.click();
 							}}
@@ -219,6 +234,8 @@
 							<ArrowUpCircle strokeWidth="2" />
 							<div class="flex items-center">{$i18n.t('Upload files')}</div>
 						</DropdownMenu.Item>
+
+						
 					</div>
 				</FolderMenu>
 			</button>
@@ -244,6 +261,7 @@
 				</div>
 			{/each}
 		{/if}
+		</div>
 	{:else}
 		{#each folder.files as node}
 			<div class=" px-4">

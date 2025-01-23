@@ -37,6 +37,7 @@
 		if (res) {
 			stopLoading();
 			show = false;
+			toast.success($i18n.t('Success'));
 		}
 	};
 </script>
