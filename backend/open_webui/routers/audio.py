@@ -458,7 +458,7 @@ def transcribe(request: Request, file_path):
     file_dir = os.path.dirname(file_path)
     id = filename.split(".")[0]
 
-    if request.app.state.config.STT_ENGINE == "":
+    if request.app.state.config.STT_ENGINE in ("", "whisper"):
         if request.app.state.faster_whisper_model is None:
             request.app.state.faster_whisper_model = set_faster_whisper_model(
                 request.app.state.config.WHISPER_MODEL
