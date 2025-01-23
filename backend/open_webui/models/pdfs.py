@@ -134,7 +134,7 @@ class PdfFolderTable:
     ) -> list[PdfFolderUserModel]:
         with get_db() as db:
             arr = []
-            
+
             stmt = db.query(PdfFolder). \
                     filter_by(user_id=user_id). \
                     order_by(PdfFolder.updated_at.desc())
