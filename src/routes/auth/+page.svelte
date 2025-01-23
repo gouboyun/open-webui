@@ -143,7 +143,7 @@
 		
 
 		<div
-			class="fixed bg-transparent min-h-screen w-full flex justify-center font-primary z-50 text-black dark:text-white"
+			class=" bg-[#eee] fixed bg-transparent min-h-screen w-full flex justify-center font-primary z-50 text-black dark:text-white"
 		>
 			<div class="w-full sm:max-w-md px-10 min-h-screen flex flex-col text-center">
 				{#if ($config?.features.auth_trusted_header ?? false) || $config?.features.auth === false}
@@ -161,7 +161,7 @@
 						</div>
 					</div>
 				{:else}
-					<div class="  my-auto pb-10 w-full dark:text-gray-100">
+					<div class=" bg-white  my-auto pb-10 w-full dark:text-gray-100 p-10 border rounded-md shadow-sm">
 						<form
 							class=" flex flex-col justify-center"
 							on:submit={(e) => {
