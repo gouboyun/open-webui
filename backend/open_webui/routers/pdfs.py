@@ -47,8 +47,10 @@ def must_build_root_folder(
 
 
 @router.get("/", response_model=list[PdfFolderUserResponse])
-async def get_pdffolder(user=Depends(get_verified_user)):
-    arr1 = Pdfs.get_folders_by_user_id(user.id)
+async def get_pdffolder(
+    q: Optional[str] = None,
+    user=Depends(get_verified_user)):
+    arr1 = Pdfs.get_folders_by_user_id(user.id, q)
 
     arr = []
     for item in arr1:

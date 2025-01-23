@@ -130,14 +130,19 @@ class PdfFolderTable:
                 return None
 
     def get_folders_by_user_id(
-        self, user_id: str
+        self, user_id: str, q: Optional[str] = None
     ) -> list[PdfFolderUserModel]:
         with get_db() as db:
             arr = []
-            for i in (
-                db.query(PdfFolder).filter_by(user_id=user_id). \
-                    order_by(PdfFolder.updated_at.desc()).all()
-                ):
+            
+            stmt = db.query(PdfFolder). \
+                    filter_by(user_id=user_id). \
+                    order_by(PdfFolder.updated_at.desc())
+            if q:
+                q = q.lower()
+                stmt = stmt.filter(PdfFolder.name.like(q))
+
+            for i in stmt.all():
                 user = Users.get_user_by_id(i.user_id)
                 arr.append(
                     PdfFolderUserModel.model_validate(
