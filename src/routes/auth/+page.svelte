@@ -140,10 +140,21 @@
 	<div class="w-full h-full absolute top-0 left-0 bg-white dark:bg-black"></div>
 
 	{#if loaded}
-		
+		<div class="fixed m-10 z-50">
+			<div class="flex space-x-2">
+				<div class=" self-center">
+					<img
+						crossorigin="anonymous"
+						src="{WEBUI_BASE_URL}/static/favicon.png"
+						class=" w-6 rounded-full"
+						alt="logo"
+					/>
+				</div>
+			</div>
+		</div>
 
 		<div
-			class=" bg-[#eee] fixed bg-transparent min-h-screen w-full flex justify-center font-primary z-50 text-black dark:text-white"
+			class="fixed bg-transparent min-h-screen w-full flex justify-center font-primary z-50 text-black dark:text-white"
 		>
 			<div class="w-full sm:max-w-md px-10 min-h-screen flex flex-col text-center">
 				{#if ($config?.features.auth_trusted_header ?? false) || $config?.features.auth === false}
@@ -161,7 +172,7 @@
 						</div>
 					</div>
 				{:else}
-					<div class=" bg-white  my-auto pb-10 w-full dark:text-gray-100 p-10 border rounded-md shadow-sm">
+					<div class="  my-auto pb-10 w-full dark:text-gray-100">
 						<form
 							class=" flex flex-col justify-center"
 							on:submit={(e) => {
