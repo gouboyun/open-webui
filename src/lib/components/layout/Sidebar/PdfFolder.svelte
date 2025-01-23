@@ -198,6 +198,8 @@
 				}}
 			>
 				<FolderMenu
+				    allowExport={false}
+					allowRename={false}
 					on:rename={() => {
 						// editHandler();
 					}}

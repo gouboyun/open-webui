@@ -5,22 +5,18 @@
 	import { v4 as uuidv4 } from 'uuid';
 	import { toast } from 'svelte-sonner';
 	import { uploadFile } from '$lib/apis/files';
-	import {
-		addFileToPdfById,
-		createPdfFolder,
-		getPdfList,
-	} from '$lib/apis/pdf';
-
+	import DOMPurify from 'dompurify';
+	import { addFileToPdfById, createPdfFolder, getPdfList } from '$lib/apis/pdf';
+	import CreatePdfFolderModal from './CreatePdfFolderModal.svelte';
 	import AddContentMenu from '$lib/components/pdf/AddContentMenu.svelte';
 	import PdfFolder from './PdfFolder.svelte';
-	onMount(async () => {
-		//await deletePdfAll(localStorage.token);
-		await getFiles();
-	});
+	import FolderConfirmDialog from '$lib/components/common/ConfirmDialog.svelte';
+
 	const i18n = getContext('i18n');
 	let filesInputElement;
 	let inputFiles;
 	let pdfFolders: any[] = [];
+	let showCreateFolderConfirm = false;
 
 	const uploadFileHandler = async (file, fullContext: boolean = false) => {
 		if ($_user?.role !== 'admin' && !($_user?.permissions?.chat?.file_upload ?? true)) {
@@ -66,8 +62,6 @@
 
 				await addFileHandler(uploadedFile.id);
 				// 文件上传成功后，自动触发pdf文件内容预览
-
-
 			} else {
 			}
 		} catch (e) {
@@ -84,8 +78,6 @@
 			await getFiles();
 		}
 	};
-
-	
 
 	const getFiles = async () => {
 		try {
@@ -125,13 +117,13 @@
 		});
 	};
 
-	const createFolderHandler = async () => {
-		const res = await createPdfFolder(localStorage.token, 'ddd');
-		if (res) {
-			await getFiles();
-		}
-	};
+	onMount(async () => {
+		//await deletePdfAll(localStorage.token);
+		await getFiles();
+	});
 </script>
+
+<CreatePdfFolderModal show={showCreateFolderConfirm} on:save={getFiles} />
 
 <div class="relative">
 	<input
@@ -173,7 +165,8 @@
 									filesInputElement.click();
 								}}
 								on:create={(e) => {
-									createFolderHandler();
+									showCreateFolderConfirm = true;
+									//createFolderHandler();
 								}}
 								on:sync={(e) => {
 									//showSyncConfirmModal = true;
@@ -187,7 +180,6 @@
 	</div>
 
 	{#each pdfFolders as folder, fileIdx}
-		<PdfFolder {folder} on:change={getFiles}/>
+		<PdfFolder {folder} on:change={getFiles} />
 	{/each}
-	
 </div>

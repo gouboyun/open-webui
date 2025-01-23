@@ -13,6 +13,8 @@
 	import Download from '$lib/components/icons/Download.svelte';
 
 	let show = false;
+	export let allowExport = true;
+	export let allowRename = true;
 </script>
 
 <Dropdown
@@ -37,26 +39,31 @@
 		>
 			<slot name="main"></slot>
 			
+			{#if allowRename}
 			<DropdownMenu.Item
-				class="flex gap-2 items-center px-3 py-1.5 text-sm  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
-				on:click={() => {
-					dispatch('rename');
-				}}
-			>
-				<Pencil strokeWidth="2" />
-				<div class="flex items-center">{$i18n.t('Rename')}</div>
-			</DropdownMenu.Item>
+			class="flex gap-2 items-center px-3 py-1.5 text-sm  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
+			on:click={() => {
+				dispatch('rename');
+			}}
+		>
+			<Pencil strokeWidth="2" />
+			<div class="flex items-center">{$i18n.t('Rename')}</div>
+		</DropdownMenu.Item>
+			{/if}
+			
+			{#if allowExport}
+				<DropdownMenu.Item
+					class="flex gap-2 items-center px-3 py-1.5 text-sm  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
+					on:click={() => {
+						dispatch('export');
+					}}
+				>
+					<Download strokeWidth="2" />
 
-			<!-- <DropdownMenu.Item
-				class="flex gap-2 items-center px-3 py-1.5 text-sm  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
-				on:click={() => {
-					dispatch('export');
-				}}
-			>
-				<Download strokeWidth="2" />
-
-				<div class="flex items-center">{$i18n.t('Export')}</div>
-			</DropdownMenu.Item> -->
+					<div class="flex items-center">{$i18n.t('Export')}</div>
+				</DropdownMenu.Item>
+			{/if}
+			
 
 			<DropdownMenu.Item
 				class="flex  gap-2  items-center px-3 py-1.5 text-sm  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
