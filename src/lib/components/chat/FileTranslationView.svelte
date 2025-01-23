@@ -188,7 +188,7 @@
 		</div>
 	</div>
 	<div class=" grid grid-cols-2 py-4 flex-1">
-		<div class=" col-span-1 flex relative">
+		<div class=" col-span-1 flex relative border-r-2">
 			{#if fileLoading}
 			<div class="bg-[rgb(100,100,100,0.5)] z-[100] absolute top-0 left-0 w-full h-full flex items-center justify-center">
 				<Spinner className="size-10 text-blue-600"/>

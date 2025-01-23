@@ -166,10 +166,6 @@
 								}}
 								on:create={(e) => {
 									showCreateFolderConfirm = true;
-									//createFolderHandler();
-								}}
-								on:sync={(e) => {
-									//showSyncConfirmModal = true;
 								}}
 							/>
 						</div>

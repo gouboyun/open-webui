@@ -177,7 +177,7 @@
 
 <div class=" w-full">
 	{#if folder.name !== '-'}
-		<div class="  border-b py-2">
+		<div class="  border-b py-1">
 			<button
 			class="px-4 py-2 hover:bg-gray-100 w-full flex items-center mt-1 cursor-pointer group"
 			on:click={() => {
