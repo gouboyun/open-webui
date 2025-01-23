@@ -200,14 +200,8 @@
 				<FolderMenu
 				    allowExport={false}
 					allowRename={false}
-					on:rename={() => {
-						// editHandler();
-					}}
 					on:delete={() => {
 						showDeleteConfirm = true;
-					}}
-					on:export={() => {
-						//exportHandler();
 					}}
 				>
 					<button class="p-0.5 dark:hover:bg-gray-850 rounded-lg touch-auto" on:click={(e) => {}}>
