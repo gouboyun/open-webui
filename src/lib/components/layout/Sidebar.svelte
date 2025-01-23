@@ -516,7 +516,7 @@
 
 		{#if $user?.role === 'admin' || $user?.permissions?.workspace?.models || $user?.permissions?.workspace?.knowledge || $user?.permissions?.workspace?.prompts || $user?.permissions?.workspace?.tools}
 			<div>
-				<div class="px-1.5 flex justify-center text-gray-800 dark:text-gray-200">
+				<div class="px-1.5 mb-1.5 flex justify-center text-gray-800 dark:text-gray-200">
 					<a
 						class="flex-grow flex space-x-3 rounded-lg px-2 py-[7px] hover:bg-gray-100 dark:hover:bg-gray-900 transition"
 						href="/workspace"
@@ -552,7 +552,7 @@
 						</div>
 					</a>
 				</div>
-				<div class="px-1.5 flex justify-center text-gray-800 dark:text-gray-200">
+				<div class="px-1.5 mb-1.5 flex justify-center text-gray-800 dark:text-gray-200">
 					<a
 						class="{$pageType === 'translation'?'bg-gray-100':''} flex-grow flex space-x-3 rounded-lg px-2 py-[7px] hover:bg-gray-100 dark:hover:bg-gray-900 transition"
 						href="/translation"
@@ -589,7 +589,7 @@
 					</a>
 				</div>
 				
-				<div class="px-1.5 flex justify-center text-gray-800 dark:text-gray-200">
+				<div class="px-1.5 mb-1.5 flex justify-center text-gray-800 dark:text-gray-200">
 					<a
 						class="{$pageType === 'pdf'?'bg-gray-100':''} flex-grow flex space-x-3 rounded-lg px-2 py-[7px] hover:bg-gray-100 dark:hover:bg-gray-900 transition"
 						href="/pdf"
@@ -626,7 +626,7 @@
 					</a>
 				</div>
 
-				<div class="px-1.5 flex justify-center text-gray-800 dark:text-gray-200">
+				<div class="px-1.5 mb-1.5 flex justify-center text-gray-800 dark:text-gray-200">
 					<a
 						class="{$pageType === 'tools'?'bg-gray-100':''} flex-grow flex space-x-3 rounded-lg px-2 py-[7px] hover:bg-gray-100 dark:hover:bg-gray-900 transition"
 						href="/tools"
