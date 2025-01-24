@@ -63,7 +63,6 @@ class PdfFolderResponse(PdfFolderModel):
 class PdfFolderForm(BaseModel):
     name: str
     parent_id: Optional[str] = None
-    # data: Optional[dict] = None
 
 
 class PdfFolderTable:
