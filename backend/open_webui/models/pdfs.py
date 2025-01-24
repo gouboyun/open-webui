@@ -4,10 +4,10 @@ import uuid
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy import BigInteger, Column, Text, JSON, Boolean
+from sqlalchemy import BigInteger, Column, Text, JSON, Boolean, or_
 
 from open_webui.internal.db import Base, get_db
-from open_webui.models.files import FileMetadataResponse
+from open_webui.models.files import Files, FileModel, FileMetadataResponse
 from open_webui.models.users import Users, UserResponse
 
 
@@ -29,11 +29,11 @@ class PdfFolder(Base):
     parent_id = Column(Text, nullable=True)
     user_id = Column(Text)
 
-    name = Column(Text)
-    description = Column(Text, nullable=True)
+    name = Column(Text, nullable=True)
 
-    data = Column(JSON, nullable=True)
-    meta = Column(JSON, nullable=True)
+    # if this is a file, then we need to store the file_id and filename
+    file_id = Column(Text, nullable=True)
+    filename = Column(Text, nullable=True)
 
     created_at = Column(BigInteger)
     updated_at = Column(BigInteger)
@@ -46,11 +46,10 @@ class PdfFolderModel(BaseModel):
     parent_id: Optional[str] = None
     user_id: str
 
-    name: str
-    description: Optional[str]
-
-    data: Optional[dict] = None
-    meta: Optional[dict] = None
+    name: Optional[str]
+    file_id: Optional[str]
+    filename: Optional[str]
+    file: Optional[FileModel] = None
 
     created_at: int  # timestamp in epoch
     updated_at: int  # timestamp in epoch
@@ -70,13 +69,13 @@ class PdfFolderUserResponse(PdfFolderUserModel):
 
 class PdfFolderForm(BaseModel):
     name: str
-    description: Optional[str] = None
     parent_id: Optional[str] = None
     data: Optional[dict] = None
 
 
 class PdfFolderTable:
     
+    # create one special folder for current user
     def insert_special_folder(
         self, user_id: str, form_data: PdfFolderForm
     ):
@@ -102,10 +101,11 @@ class PdfFolderTable:
                     return None
             except Exception:
                 return None
-        
+
     def insert_new_folder(
         self, user_id: str, form_data: PdfFolderForm
     ) -> Optional[PdfFolderModel]:
+        '''create a single folder, no file attached'''
         with get_db() as db:
             m = PdfFolderModel(
                 **{
@@ -141,7 +141,10 @@ class PdfFolderTable:
             if q:
                 q = q.lower()
                 stmt = db.query(PdfFolder).filter(
-                    PdfFolder.name.like(f'%{q}%'),
+                    or_([
+                        PdfFolder.name.like(f'%{q}%'),
+                        PdfFolder.filename.like(f'%{q}%'),
+                        ]),
                     PdfFolder.user_id == user_id,
                     ).order_by(PdfFolder.updated_at.desc())
 
@@ -157,44 +160,42 @@ class PdfFolderTable:
                 )
             return arr
 
-    def get_folder_by_id(self, id: str) -> Optional[PdfFolderModel]:
+    def get_folder_by_id(self, id: str) -> Optional[list[PdfFolderModel]]:
         try:
+            resp = []
             with get_db() as db:
-                m = db.query(PdfFolder).filter_by(id=id).first()
-                return PdfFolderModel.model_validate(m) if m else None
+                arr = db.query(PdfFolder).\
+                    filter(or_(
+                        PdfFolder.id == id,
+                        PdfFolder.file_id == id,
+                        )).all()
+                for i in arr:
+                    if i.file_id:
+                        f = Files.get_file_by_id(i.file_id)
+                    resp.append({
+                        **PdfFolderModel.model_validate(i), 
+                        "file": f if f else None,
+                    })
+                        
         except Exception:
             return None
 
-    def update_folder_by_id(
-        self, id: str, form_data: PdfFolderForm, overwrite: bool = False
+    def add_file_to_folder(
+        self, id: str, file_id: str, filename: str
     ) -> Optional[PdfFolderModel]:
         try:
             with get_db() as db:
-                m = self.get_folder_by_id(id=id)
-                db.query(m).filter_by(id=id).update(
-                    {
-                        **form_data.model_dump(),
-                        "updated_at": int(time.time()),
-                    }
-                )
-                db.commit()
-                return self.get_folder_by_id(id=id)
-        except Exception as e:
-            log.exception(e)
-            return None
-
-    def update_folder_data_by_id(
-        self, id: str, data: dict
-    ) -> Optional[PdfFolderModel]:
-        try:
-            with get_db() as db:
-                m = self.get_folder_by_id(id=id)
-                db.query(PdfFolder).filter_by(id=id).update(
-                    {
-                        "data": data,
-                        "updated_at": int(time.time()),
-                    }
-                )
+                m1 = self.get_folder_by_id(id=id)
+                if not m1:
+                    raise Exception("folder not found")
+                
+                p = PdfFolder(
+                    id = str(uuid),
+                    parent_id = id,
+                    file_id = file_id, 
+                    filename = filename,
+                    )
+                db.add(p)
                 db.commit()
                 return self.get_folder_by_id(id=id)
         except Exception as e:
@@ -204,6 +205,7 @@ class PdfFolderTable:
     def delete_folder_by_id(self, id: str) -> bool:
         try:
             with get_db() as db:
+                db.query(PdfFolder).filter(PdfFolder.parent_id == id).delete()
                 db.query(PdfFolder).filter_by(id=id).delete()
                 db.commit()
                 return True
@@ -213,7 +215,7 @@ class PdfFolderTable:
     def delete_all_folder_by_uid(self, uid: str) -> bool:
         with get_db() as db:
             try:
-                db.query(PdfFolder).filter(user_id = uid).delete()
+                db.query(PdfFolder).filter(PdfFolder.user_id == uid).delete()
                 db.commit()
 
                 return True
