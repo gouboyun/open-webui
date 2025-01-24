@@ -47,86 +47,62 @@ def must_build_root_folder(
 
 
 @router.get("/", response_model=list[PdfFolderResponse])
-async def get_pdffolder(
-        user = Depends(get_verified_user),
-        q: Optional[str] = None,
-    ):
-    result = []
-    folder_map = dict()
-
-    for item in Pdfs.get_folders_by_user_id(user.id, q):
-        if not item.file_id:
-            folder_item = PdfFolderResponse(
-                **{
-                    **item.model_dump(),
-                }
-            )
-            result.append(folder_item)
-            folder_map[item.file_id] = folder_item
-
-    for item in Pdfs.get_folders_by_user_id(user.id, q):
-        if item.file_id:
-            fs = []
-            f = Files.get_file_by_id(item.file_id)
-            fs.append(f)
-
-            folder_file_item = PdfFolderResponse(
-                **{
-                    **item.model_dump(),
-                    "files": fs,
-                }
-            )
-            folder_map[item.parent_id].files.append(folder_file_item)
-
-    return result
-
 # async def get_pdffolder(
 #         user = Depends(get_verified_user),
 #         q: Optional[str] = None,
 #     ):
 #     result = []
+#     folder_map = dict()
+
+#     for item in Pdfs.get_folders_by_user_id(user.id, q):
+#         if not item.file_id:
+#             folder_item = PdfFolderResponse(
+#                 **{
+#                     **item.model_dump(),
+#                 }
+#             )
+#             result.append(folder_item)
+#             folder_map[item.file_id] = folder_item
+
 #     for item in Pdfs.get_folders_by_user_id(user.id, q):
 #         if item.file_id:
+#             fs = []
 #             f = Files.get_file_by_id(item.file_id)
-#             result.append(
-#                 PdfFolderResponse(
-#                     **{
+#             fs.append(f)
+
+#             folder_file_item = PdfFolderResponse(
+#                 **{
 #                     **item.model_dump(),
-#                     "file": f,
-#                     }
-#                 )
+#                     "files": fs,
+#                 }
 #             )
-#         else:
-#             result.append(
-#                 PdfFolderResponse(
-#                     **{
-#                     **item.model_dump(),
-#                     }
-#                 )
-#             )
+#             folder_map[item.parent_id].files.append(folder_file_item)
 
-#     def findRoot(result):
-#         for v in result:
-#             if not v.parent_id:
-#                 return v
-#         return None
-
-#     def findChildren(root, arr):
-#         items = []
-#         for idx in range(len(arr)-1, -1, -1):
-#             v = arr[idx]
-#             if v.parent_id == root.id:
-#                 arr.remove(v)
-#                 items.append(v)
-#         return items
-
-#     if result:
-#         root = findRoot(result)
-#         result.remove(root)
-#         while result:
-#             root.children = findChildren(root, result)
-        
 #     return result
+
+async def get_pdffolder(
+        user = Depends(get_verified_user),
+        q: Optional[str] = None,
+    ):
+    arr = Pdfs.get_folders_by_user_id(user.id, q)
+    d = {}
+    root = None
+    for item in arr:
+        if not item.parent_id:
+            root = item
+        d[item.id] = item
+    
+    for item in arr:
+        if item == root:
+            continue
+        if item.parent_id:
+            v = d[item.parent_id]
+            if not v.chidren:
+                v.children = []
+            v.chidren.append(item)
+
+        
+    # return result
 
 
 @router.get("/list", response_model=list[PdfFolderResponse])
