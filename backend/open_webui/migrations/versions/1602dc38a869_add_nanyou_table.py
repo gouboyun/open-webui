@@ -24,10 +24,9 @@ def upgrade():
         sa.Column("id", sa.Text(), primary_key=True),
         sa.Column("parent_id", sa.Text(), nullable=True),
         sa.Column("user_id", sa.Text(), nullable=False),
-        sa.Column("name", sa.Text(), nullable=False),
-        sa.Column("description", sa.Text(), nullable=True),
-        sa.Column("data", sa.JSON(), nullable=True),
-        sa.Column("meta", sa.JSON(), nullable=True),
+        sa.Column("name", sa.Text(), nullable=True),
+        sa.Column("file_id", sa.Text(), nullable=True),
+        sa.Column("filename", sa.Text(), nullable=True),
         sa.Column("created_at", sa.BigInteger(), nullable=False),
         sa.Column("updated_at", sa.BigInteger(), nullable=True),
     )
