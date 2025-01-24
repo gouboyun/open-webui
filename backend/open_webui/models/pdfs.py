@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import time
 import uuid
@@ -54,18 +56,8 @@ class PdfFolderModel(BaseModel):
     updated_at: int  # timestamp in epoch
 
 
-class PdfFolderFileModel(PdfFolderModel):
-    file: Optional[FileModel] = None
-
-
 class PdfFolderResponse(PdfFolderModel):
-    # files: Optional[list[FileMetadataResponse | dict]] = None
-    pass
-
-
-class PdfFolderUserResponse(PdfFolderFileModel):
-    # files: Optional[list[FileMetadataResponse | dict]] = None
-    pass
+    children: list[PdfFolderResponse]= None
 
 
 class PdfFolderForm(BaseModel):
