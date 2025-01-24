@@ -554,7 +554,7 @@
 				</div>
 				<div class="px-1.5 mb-1.5 flex justify-center text-gray-800 dark:text-gray-200">
 					<a
-						class="{$pageType === 'translation'?'bg-gray-100':''} flex-grow flex space-x-3 rounded-lg px-2 py-[7px] hover:bg-gray-100 dark:hover:bg-gray-900 transition"
+						class="{$pageType === 'translation'?'bg-gray-100 dark:bg-gray-900':''} flex-grow flex space-x-3 rounded-lg px-2 py-[7px] hover:bg-gray-100 dark:hover:bg-gray-900 transition"
 						href="/translation"
 						on:click={() => {
 							selectedChatId = null;
@@ -591,7 +591,7 @@
 				
 				<div class="px-1.5 mb-1.5 flex justify-center text-gray-800 dark:text-gray-200">
 					<a
-						class="{$pageType === 'pdf'?'bg-gray-100':''} flex-grow flex space-x-3 rounded-lg px-2 py-[7px] hover:bg-gray-100 dark:hover:bg-gray-900 transition"
+						class="{$pageType === 'pdf'?'bg-gray-100 dark:bg-gray-900':''} flex-grow flex space-x-3 rounded-lg px-2 py-[7px] hover:bg-gray-100 dark:hover:bg-gray-900 transition"
 						href="/pdf"
 						on:click={() => {
 							selectedChatId = null;
@@ -628,7 +628,7 @@
 
 				<div class="px-1.5 mb-1.5 flex justify-center text-gray-800 dark:text-gray-200">
 					<a
-						class="{$pageType === 'tools'?'bg-gray-100':''} flex-grow flex space-x-3 rounded-lg px-2 py-[7px] hover:bg-gray-100 dark:hover:bg-gray-900 transition"
+						class="{$pageType === 'tools'?'bg-gray-100 dark:bg-gray-900':''} flex-grow flex space-x-3 rounded-lg px-2 py-[7px] hover:bg-gray-100 dark:hover:bg-gray-900 transition"
 						href="/tools"
 						on:click={() => {
 							selectedChatId = null;

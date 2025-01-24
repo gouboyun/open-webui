@@ -53,7 +53,7 @@
 	};
 </script>
 
-<div class="  w-full bg-[#efefef] grid grid-cols-6 grid-rows-4">
+<div class="  w-full bg-[#efefef] dark:bg-transparent grid grid-cols-6 grid-rows-4">
 	{#each tools as tool}
 		<button
 			on:click={() => {
