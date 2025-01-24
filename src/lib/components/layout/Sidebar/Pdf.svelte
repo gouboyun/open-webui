@@ -17,6 +17,30 @@
 	let inputFiles;
 	let pdfFolders: any[] = [];
 	let showCreateFolderConfirm = false;
+	let search = '';
+	let searchDebounceTimeout;
+
+	const searchDebounceHandler = async () => {
+
+		if (searchDebounceTimeout) {
+			clearTimeout(searchDebounceTimeout);
+		}
+
+		if (search === '') {
+			//await initChatList();
+			return;
+		} else {
+			searchDebounceTimeout = setTimeout(async () => {
+				//allChatsLoaded = false;
+				//currentChatPage.set(1);
+				// await chats.set(await getChatListBySearchText(localStorage.token, search));
+
+				// if ($chats.length === 0) {
+				// 	tags.set(await getAllTags(localStorage.token));
+				// }
+			}, 1000);
+		}
+	};
 
 	const uploadFileHandler = async (file, fullContext: boolean = false) => {
 		if ($_user?.role !== 'admin' && !($_user?.permissions?.chat?.file_upload ?? true)) {
@@ -158,7 +182,11 @@
 			<div class="w-full h-full flex flex-col">
 				<div class=" pr-3">
 					<div class="flex mb-0.5">
-						<SearchInput placeholder={$i18n.t('Search')} />
+						<SearchInput 
+						bind:value={search}
+						on:input={searchDebounceHandler}
+						placeholder={$i18n.t('Search')}
+						/>
 						<div>
 							<AddContentMenu
 								on:upload={(e) => {
