@@ -46,45 +46,21 @@ def must_build_root_folder(
     return id, m
 
 
-@router.get("/", response_model=list[PdfFolderResponse])
-# async def get_pdffolder(
-#         user = Depends(get_verified_user),
-#         q: Optional[str] = None,
-#     ):
-#     result = []
-#     folder_map = dict()
-
-#     for item in Pdfs.get_folders_by_user_id(user.id, q):
-#         if not item.file_id:
-#             folder_item = PdfFolderResponse(
-#                 **{
-#                     **item.model_dump(),
-#                 }
-#             )
-#             result.append(folder_item)
-#             folder_map[item.file_id] = folder_item
-
-#     for item in Pdfs.get_folders_by_user_id(user.id, q):
-#         if item.file_id:
-#             fs = []
-#             f = Files.get_file_by_id(item.file_id)
-#             fs.append(f)
-
-#             folder_file_item = PdfFolderResponse(
-#                 **{
-#                     **item.model_dump(),
-#                     "files": fs,
-#                 }
-#             )
-#             folder_map[item.parent_id].files.append(folder_file_item)
-
-#     return result
-
+@router.get("/", response_model=PdfFolderResponse)
 async def get_pdffolder(
         user = Depends(get_verified_user),
         q: Optional[str] = None,
     ):
-    arr = Pdfs.get_folders_by_user_id(user.id, q)
+    arr1 = Pdfs.get_folders_by_user_id(user.id, q)
+    arr = []
+    for item in arr1:
+        try:
+            arr.append(
+                PdfFolderResponse.model_validate({**item.model_dump()})
+            )
+        except Exception:
+            log.error("get_pdffolder () failed")
+
     d = {}
     root = None
     for item in arr:
@@ -97,15 +73,17 @@ async def get_pdffolder(
             continue
         if item.parent_id:
             v = d[item.parent_id]
-            if not v.chidren:
+            if not v.children:
                 v.children = []
-            v.chidren.append(item)
+            v.children.append(item)
 
-        
-    # return result
+    if not root:
+        id, m = must_build_root_folder('null', user)
+        return PdfFolderResponse.model_validate({**m.model_dump()})
+    return root
 
 
-@router.get("/list", response_model=list[PdfFolderResponse])
+@router.get("/list", response_model=PdfFolderResponse)
 async def get_folder_list(
         user = Depends(get_verified_user),
         q: Optional[str] = None,

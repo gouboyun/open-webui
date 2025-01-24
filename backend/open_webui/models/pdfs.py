@@ -57,7 +57,7 @@ class PdfFolderModel(BaseModel):
 
 
 class PdfFolderResponse(PdfFolderModel):
-    children: list[PdfFolderResponse]= None
+    children: Optional[list[PdfFolderResponse]] = None
 
 
 class PdfFolderForm(BaseModel):
