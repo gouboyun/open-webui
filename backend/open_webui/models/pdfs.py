@@ -54,22 +54,24 @@ class PdfFolderModel(BaseModel):
     updated_at: int  # timestamp in epoch
 
 
-class PdfFolderUserModel(PdfFolderModel):
-    user: Optional[UserResponse] = None
+class PdfFolderFileModel(PdfFolderModel):
+    file: Optional[FileModel] = None
 
 
 class PdfFolderResponse(PdfFolderModel):
-    files: Optional[list[FileMetadataResponse | dict]] = None
+    # files: Optional[list[FileMetadataResponse | dict]] = None
+    pass
 
 
-class PdfFolderUserResponse(PdfFolderUserModel):
-    files: Optional[list[FileMetadataResponse | dict]] = None
+class PdfFolderUserResponse(PdfFolderFileModel):
+    # files: Optional[list[FileMetadataResponse | dict]] = None
+    pass
 
 
 class PdfFolderForm(BaseModel):
     name: str
     parent_id: Optional[str] = None
-    data: Optional[dict] = None
+    # data: Optional[dict] = None
 
 
 class PdfFolderTable:
@@ -131,7 +133,7 @@ class PdfFolderTable:
 
     def get_folders_by_user_id(
         self, user_id: str, q: Optional[str] = None
-    ) -> list[PdfFolderUserModel]:
+    ) -> list[PdfFolderModel]:
         with get_db() as db:
             arr = []
 
@@ -149,31 +151,17 @@ class PdfFolderTable:
                     ).order_by(PdfFolder.updated_at.desc())
 
             for i in stmt.all():
-                user = Users.get_user_by_id(i.user_id)
-                arr.append(
-                    PdfFolderUserModel.model_validate(
-                        {
-                            **PdfFolderModel.model_validate(i).model_dump(),
-                            "user": user.model_dump() if user else None,
-                        },
-                    )
-                )
+                # f = Files.get_file_by_id(i.file_id) if i.file_id else None
+                arr.append(PdfFolderModel.model_validate(i))
             return arr
 
     def get_folder_by_id(self, id: str) -> Optional[PdfFolderModel]:
         try:
             with get_db() as db:
                 mm = db.query(PdfFolder).filter(PdfFolder.id == id).first()
-                d = {}
-                if mm and mm.file_id:
-                    f = Files.get_file_by_id(mm.file_id)
-                    if f:
-                        d['file_id'] = f.id
-                        d['filename'] = f.filename
                 p = PdfFolderModel.model_validate(mm)
-                p = PdfFolderModel.model_validate({**p.model_dump(), **d}, strict=False)
                 return p
-                        
+
         except Exception:
             return None
 

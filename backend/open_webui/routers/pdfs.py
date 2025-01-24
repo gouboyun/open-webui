@@ -7,7 +7,7 @@ from open_webui.models.pdfs import (
     Pdfs,
     PdfFolderForm,
     PdfFolderResponse,
-    PdfFolderUserResponse,
+    PdfFolderFileModel,
 )
 
 from open_webui.models.files import Files, FileModel
@@ -50,93 +50,44 @@ def must_build_root_folder(
     return id, m
 
 
-@router.get("/", response_model=list[PdfFolderUserResponse])
+@router.get("/", response_model=list[PdfFolderFileModel])
 async def get_pdffolder(
-    q: Optional[str] = None,
-    user=Depends(get_verified_user)):
-    arr1 = Pdfs.get_folders_by_user_id(user.id, q)
+        user = Depends(get_verified_user),
+        q: Optional[str] = None,
+    ):
+    result = []
 
-    arr = []
-    for item in arr1:
-        files = []
-        if item.data:
-            
-            # read real file info from db and disk
-            files = Files.get_file_metadatas_by_ids(
-                item.data.get("file_ids", [])
-            )
-
-            # Check if all files exist
-            if len(files) != len(item.data.get("file_ids", [])):
-                missing_files = list(
-                    set(item.data.get("file_ids", []))
-                    - set([file.id for file in files])
+    for item in Pdfs.get_folders_by_user_id(user.id, q):
+        log.info(f"get_pdffolder() --> {item}")
+        if item.file_id:
+            f = Files.get_file_by_id(item.file_id)
+            log.info(f"get_pdffolder() --> {f}")
+            result.append(
+                PdfFolderFileModel(
+                    **{
+                    **item.model_dump(),
+                    "file": f,
+                    }
                 )
-                if missing_files:
-                    data = item.data or {}
-                    file_ids = data.get("file_ids", [])
-
-                    for missing_file in missing_files:
-                        file_ids.remove(missing_file)
-
-                    data["file_ids"] = file_ids
-                    Pdfs.update_folder_data_by_id(
-                        id=item.id, data=data
-                    )
-
-                    files = Files.get_file_metadatas_by_ids(file_ids)
-
-        arr.append(
-            PdfFolderUserResponse(
-                **item.model_dump(),
-                files=files,
             )
-        )
-
-    return arr
-
-
-@router.get("/list", response_model=list[PdfFolderUserResponse])
-async def get_folder_list(user=Depends(get_verified_user),
-                          q: Optional[str] = None,
-                          ):
-    arr = Pdfs.get_folders_by_user_id(user.id)
-
-    arr1 = []
-    for item in arr:
-        files = []
-        if item.data:
-            files = Files.get_file_metadatas_by_ids(
-                item.data.get("file_ids", [])
-            )
-
-            # Check if all files exist
-            if len(files) != len(item.data.get("file_ids", [])):
-                missing_files = list(
-                    set(item.data.get("file_ids", []))
-                    - set([file.id for file in files])
+        else:
+            log.info(f"get_pdffolder() --> file_id None: {item.file_id}")
+            result.append(
+                PdfFolderFileModel(
+                    **{
+                    **item.model_dump(),
+                    }
                 )
-                if missing_files:
-                    data = item.data or {}
-                    file_ids = data.get("file_ids", [])
-
-                    for missing_file in missing_files:
-                        file_ids.remove(missing_file)
-
-                    data["file_ids"] = file_ids
-                    Pdfs.update_folder_data_by_id(
-                        id=item.id, data=data
-                    )
-
-                    files = Files.get_file_metadatas_by_ids(file_ids)
-
-        arr1.append(
-            PdfFolderUserResponse(
-                **item.model_dump(),
-                files=files,
             )
-        )
-    return arr1
+    return result
+
+
+@router.get("/list", response_model=list[PdfFolderFileModel])
+async def get_folder_list(
+        user = Depends(get_verified_user),
+        q: Optional[str] = None,
+    ):
+    return await get_pdffolder(user, q)
 
 
 ############################
