@@ -49,7 +49,6 @@ class PdfFolderModel(BaseModel):
     name: Optional[str] = None
     file_id: Optional[str] = None
     filename: Optional[str] = None
-    file: Optional[FileModel] = None
 
     created_at: int  # timestamp in epoch
     updated_at: int  # timestamp in epoch
@@ -91,12 +90,13 @@ class PdfFolderTable:
             )
 
             try:
-                result = PdfFolder(**m.model_dump())
-                db.add(result)
+                t = PdfFolder(**m.model_dump())
+
+                db.add(t)
                 db.commit()
-                db.refresh(result)
-                if result:
-                    return PdfFolderModel.model_validate(result)
+                db.refresh(t)
+                if t:
+                    return PdfFolderModel.model_validate(t)
                 else:
                     return None
             except Exception:
@@ -160,22 +160,19 @@ class PdfFolderTable:
                 )
             return arr
 
-    def get_folder_by_id(self, id: str) -> Optional[list[PdfFolderModel]]:
+    def get_folder_by_id(self, id: str) -> Optional[PdfFolderModel]:
         try:
-            resp = []
             with get_db() as db:
-                arr = db.query(PdfFolder).\
-                    filter(or_(
-                        PdfFolder.id == id,
-                        PdfFolder.file_id == id,
-                        )).all()
-                for i in arr:
-                    if i.file_id:
-                        f = Files.get_file_by_id(i.file_id)
-                    resp.append({
-                        **PdfFolderModel.model_validate(i), 
-                        "file": f if f else None,
-                    })
+                mm = db.query(PdfFolder).filter(PdfFolder.id == id).first()
+                d = {}
+                if mm and mm.file_id:
+                    f = Files.get_file_by_id(mm.file_id)
+                    if f:
+                        d['file_id'] = f.id
+                        d['filename'] = f.filename
+                p = PdfFolderModel.model_validate(mm)
+                p = PdfFolderModel.model_validate({**p.model_dump(), **d}, strict=False)
+                return p
                         
         except Exception:
             return None
@@ -189,11 +186,16 @@ class PdfFolderTable:
                 if not m1:
                     raise Exception("folder not found")
                 
+                newid = str(uuid.uuid4())
                 p = PdfFolder(
-                    id = str(uuid),
+                    id = newid,
                     parent_id = id,
-                    file_id = file_id, 
+                    user_id = m1.user_id,
+                    name = f"file-{newid}",
+                    file_id = file_id,
                     filename = filename,
+                    created_at= int(time.time()),
+                    updated_at= int(time.time()),
                     )
                 db.add(p)
                 db.commit()

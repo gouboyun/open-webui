@@ -32,17 +32,21 @@ router = APIRouter()
 
 
 def must_build_root_folder(
-    id:str,
+    id: str,
     user=Depends(get_verified_user)):
     '''
     if id is null, use user id as folder id
     '''
     if id.lower() == "null":
         id = user.id
+        log.info(f"must_build_root_folder() --> 001 id={id}")
     m = Pdfs.get_folder_by_id(id=id)
     if not m and id == user.id:
+        log.info(f"must_build_root_folder() --> 002 m==>{m}")
         # 用当前用户 id 作为 folder_id 单独创建一个 folder
         m = Pdfs.insert_special_folder(user.id, PdfFolderForm(name='-', description="empty"))
+        log.info(f"must_build_root_folder() --> 003 {m}")
+
     return id, m
 
 
@@ -157,7 +161,7 @@ async def create_new_pdffolder(
 
 
 class PdfFilesResponse(PdfFolderResponse):
-    files: list[FileModel]
+    files: Optional[list[FileModel]] = None
 
 
 @router.get("/{id}", response_model=Optional[PdfFilesResponse])
@@ -224,7 +228,7 @@ def add_file_to_folder_by_id(
     id: str,
     form_data: PdfFolderFileIdForm,
     user=Depends(get_verified_user),
-):
+):    
     id, m = must_build_root_folder(id, user)
     if not m:
         raise HTTPException(
@@ -256,7 +260,6 @@ def add_file_to_folder_by_id(
             request, ProcessFileForm(file_id=form_data.file_id, collection_name=id)
         )
     except Exception as e:
-        log.debug(e)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
@@ -271,7 +274,7 @@ def add_file_to_folder_by_id(
 
             return PdfFilesResponse(
                 **m.model_dump(),
-                files=files,
+                # files=files,
             )
         else:
             raise HTTPException(
