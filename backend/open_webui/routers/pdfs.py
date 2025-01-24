@@ -47,8 +47,10 @@ def must_build_root_folder(
 
 
 @router.get("/", response_model=list[PdfFolderUserResponse])
-async def get_pdffolder(user=Depends(get_verified_user)):
-    arr1 = Pdfs.get_folders_by_user_id(user.id)
+async def get_pdffolder(
+    q: Optional[str] = None,
+    user=Depends(get_verified_user)):
+    arr1 = Pdfs.get_folders_by_user_id(user.id, q)
 
     arr = []
     for item in arr1:
@@ -91,7 +93,9 @@ async def get_pdffolder(user=Depends(get_verified_user)):
 
 
 @router.get("/list", response_model=list[PdfFolderUserResponse])
-async def get_folder_list(user=Depends(get_verified_user)):
+async def get_folder_list(user=Depends(get_verified_user),
+                          q: Optional[str] = None,
+                          ):
     arr = Pdfs.get_folders_by_user_id(user.id)
 
     arr1 = []
@@ -259,31 +263,20 @@ def add_file_to_folder_by_id(
         )
 
     if m:
-        data = m.data or {}
-        file_ids = data.get("file_ids", [])
+        file_id = form_data.file_id
+        m = Pdfs.add_file_to_folder(id, file_id, file.filename)
 
-        if form_data.file_id not in file_ids:
-            file_ids.append(form_data.file_id)
-            data["file_ids"] = file_ids
+        if m:
+            # files = Files.get_files_by_ids(file_ids)
 
-            m = Pdfs.update_folder_data_by_id(id=id, data=data)
-
-            if m:
-                files = Files.get_files_by_ids(file_ids)
-
-                return PdfFilesResponse(
-                    **m.model_dump(),
-                    files=files,
-                )
-            else:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=ERROR_MESSAGES.DEFAULT("folder"),
-                )
+            return PdfFilesResponse(
+                **m.model_dump(),
+                files=files,
+            )
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=ERROR_MESSAGES.DEFAULT("file_id"),
+                detail=ERROR_MESSAGES.DEFAULT("folder"),
             )
     else:
         raise HTTPException(

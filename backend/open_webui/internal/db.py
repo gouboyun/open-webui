@@ -15,7 +15,7 @@ from open_webui.env import (
 )
 from peewee_migrate import Router
 from sqlalchemy import Dialect, create_engine, types
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.pool import QueuePool, NullPool
 from sqlalchemy.sql.type_api import _T
