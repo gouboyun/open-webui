@@ -93,7 +93,9 @@ async def get_pdffolder(
 
 
 @router.get("/list", response_model=list[PdfFolderUserResponse])
-async def get_folder_list(user=Depends(get_verified_user)):
+async def get_folder_list(user=Depends(get_verified_user),
+                          q: Optional[str] = None,
+                          ):
     arr = Pdfs.get_folders_by_user_id(user.id)
 
     arr1 = []
