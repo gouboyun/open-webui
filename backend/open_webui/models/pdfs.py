@@ -143,10 +143,10 @@ class PdfFolderTable:
             if q:
                 q = q.lower()
                 stmt = db.query(PdfFolder).filter(
-                    or_([
+                    or_(
                         PdfFolder.name.like(f'%{q}%'),
                         PdfFolder.filename.like(f'%{q}%'),
-                        ]),
+                        ),
                     PdfFolder.user_id == user_id,
                     ).order_by(PdfFolder.updated_at.desc())
 
