@@ -46,9 +46,9 @@ class PdfFolderModel(BaseModel):
     parent_id: Optional[str] = None
     user_id: str
 
-    name: Optional[str]
-    file_id: Optional[str]
-    filename: Optional[str]
+    name: Optional[str] = None
+    file_id: Optional[str] = None
+    filename: Optional[str] = None
     file: Optional[FileModel] = None
 
     created_at: int  # timestamp in epoch
