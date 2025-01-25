@@ -77,10 +77,10 @@ async def get_pdffolder(
         child_q = Pdfs.search_folders_by_uid(user.id, q)
         for item in child_q:
             item_set.add(item.id)
-            v = d[item.parent_id]
+            v = d[item.id]
             while v.parent_id:
-                item_set.add(v.parent_id)
-                v = v[v.parent_id]
+                v = d[v.parent_id]
+                item_set.add(v.id)
 
         for item in arr:
             if item == root:
