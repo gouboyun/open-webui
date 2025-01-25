@@ -54,7 +54,7 @@ async def get_pdffolder(
     # 
     id, root = must_build_root_folder('null', user)
 
-    arr1 = Pdfs.search_folders_by_uid(user.id, q)
+    arr1 = Pdfs.get_folders_by_user_id(user.id, q)
     arr = []
     for item in arr1:
         try:
