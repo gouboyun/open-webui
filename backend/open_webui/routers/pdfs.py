@@ -81,10 +81,25 @@ async def get_pdffolder(
                 v.children = []
             v.children.append(item)
 
+    if q:
+        q = q.lower()
+        if root.children:
+            dfs_children(root, q, d)
+
     if not root:
         id, m = must_build_root_folder('null', user)
         return PdfFolderResponse.model_validate({**m.model_dump()})
     return root
+
+
+def dfs_children(root, q: str, d: dict):
+    if root is None:
+        return
+    if not root.children and (q in root.name or q in root.filename):
+        d[root.parent_id].children.remove(root)
+        return
+    for child in root.children:
+        dfs_children(child, q, d)
 
 
 @router.get("/list", response_model=PdfFolderResponse)
