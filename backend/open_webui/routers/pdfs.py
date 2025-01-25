@@ -66,7 +66,16 @@ async def get_pdffolder(
 
     d = {}
     root = None
-    for item in arr:
+    all1 = Pdfs.search_folders_by_uid(user.id)
+    all2 = []
+    for item in all1:
+        try:
+            all2.append(
+                PdfFolderResponse.model_validate({**item.model_dump()})
+            )
+        except Exception:
+            log.error("get_pdffolder () failed")
+    for item in all2:
         if not item.parent_id:
             root = item
         d[item.id] = item
