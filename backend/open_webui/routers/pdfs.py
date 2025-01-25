@@ -92,11 +92,11 @@ async def get_pdffolder(
     return root
 
 
-def dfs_children(root, q: str, d: dict):
-    if root is None:
-        return
-    if not root.children and (q in root.name or q in root.filename):
+def dfs_children(root: PdfFolderResponse, q: str, d: dict):
+    if not root.children and (q not in root.name and q not in root.filename):
         d[root.parent_id].children.remove(root)
+        return
+    if not root.children:
         return
     for child in root.children:
         dfs_children(child, q, d)
