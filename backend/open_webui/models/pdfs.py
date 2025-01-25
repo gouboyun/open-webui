@@ -186,6 +186,18 @@ class PdfFolderTable:
     def delete_folder_by_id(self, id: str) -> bool:
         try:
             with get_db() as db:
+                
+                def drop_child_folder(id):
+                    children = db.query(PdfFolder).filter(PdfFolder.parent_id == id).all()
+                    for child in children:
+                        drop_child_folder(child.id)
+                        if child.file_id:
+                            Files.delete_file_by_id(child.file_id)
+                    db.query(PdfFolder).filter_by(id=id).delete()
+                    db.commit()
+                
+                drop_child_folder(id)
+
                 db.query(PdfFolder).filter(PdfFolder.parent_id == id).delete()
                 db.query(PdfFolder).filter_by(id=id).delete()
                 db.commit()
