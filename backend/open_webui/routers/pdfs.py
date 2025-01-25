@@ -318,54 +318,11 @@ def remove_file_from_folder_by_id(
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
         )
 
-    file = Files.get_file_by_id(form_data.file_id)
-    if not file:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ERROR_MESSAGES.NOT_FOUND,
-        )
-
-    # Remove content from the vector database
-    try:
-        VECTOR_DB_CLIENT.delete(
-            collection_name=m.id, filter={"file_id": form_data.file_id}
-        )
-    except Exception as e:
-        log.debug("remove from vector db failed")
-        pass
-
-    if m:
-        data = m.data or {}
-        file_ids = data.get("file_ids", [])
-
-        if form_data.file_id in file_ids:
-            file_ids.remove(form_data.file_id)
-            data["file_ids"] = file_ids
-
-            m = Pdfs.update_folder_data_by_id(id=id, data=data)
-
-            if m:
-                files = Files.get_files_by_ids(file_ids)
-
-                return PdfFolderResponse(
-                    **m.model_dump(),
-                    files=files,
-                )
-            else:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=ERROR_MESSAGES.DEFAULT("folder"),
-                )
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=ERROR_MESSAGES.DEFAULT("file_id"),
-            )
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ERROR_MESSAGES.NOT_FOUND,
-        )
+    Pdfs.delete_folder_by_id(id)
+    
+    id = "null"
+    id, m = must_build_root_folder(id, user)
+    return PdfFolderResponse.model_validate({**m.model_dump()})
 
 
 @router.delete("/{id}/delete", response_model=bool)
