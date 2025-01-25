@@ -71,35 +71,41 @@ async def get_pdffolder(
         if not item.parent_id:
             root = item
         d[item.id] = item
-    
-    for item in arr:
-        if item == root:
-            continue
-        if item.parent_id:
-            v = d[item.parent_id]
-            if not v.children:
-                v.children = []
-            v.children.append(item)
 
     if q:
-        q = q.lower()
-        if root.children:
-            dfs_children(root, q, d)
+        item_set = set()
+        child_q = Pdfs.search_folders_by_uid(user.id, q)
+        for item in child_q:
+            item_set.add(item.id)
+            v = d[item.parent_id]
+            while v.parent_id:
+                item_set.add(v.parent_id)
+                v = v[v.parent_id]
+
+        for item in arr:
+            if item == root:
+                continue
+            if item.parent_id and item.id in item_set:
+                v = d[item.parent_id]
+                if not v.children:
+                    v.children = []
+                v.children.append(item)
+
+    else:
+        for item in arr:
+            if item == root:
+                continue
+            if item.parent_id:
+                v = d[item.parent_id]
+                if not v.children:
+                    v.children = []
+                v.children.append(item)
 
     if not root:
         id, m = must_build_root_folder('null', user)
         return PdfFolderResponse.model_validate({**m.model_dump()})
     return root
 
-
-def dfs_children(root: PdfFolderResponse, q: str, d: dict):
-    if not root.children and (q not in root.name and q not in root.filename):
-        d[root.parent_id].children.remove(root)
-        return
-    if not root.children:
-        return
-    for child in root.children:
-        dfs_children(child, q, d)
 
 
 @router.get("/list", response_model=PdfFolderResponse)
