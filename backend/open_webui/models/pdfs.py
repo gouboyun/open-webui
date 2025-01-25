@@ -122,8 +122,8 @@ class PdfFolderTable:
             except Exception:
                 return None
 
-    def get_folders_by_user_id(
-        self, user_id: str, q: Optional[str] = None
+    def search_folders_by_uid(self,
+        user_id: str, q: Optional[str] = None
     ) -> list[PdfFolderModel]:
         with get_db() as db:
             arr = []
@@ -140,9 +140,22 @@ class PdfFolderTable:
                         ),
                     PdfFolder.user_id == user_id,
                     ).order_by(PdfFolder.updated_at.desc())
-
             for i in stmt.all():
                 # f = Files.get_file_by_id(i.file_id) if i.file_id else None
+                arr.append(PdfFolderModel.model_validate(i))
+            return arr
+
+    def get_folders_by_user_id(
+        self, user_id: str, q: Optional[str] = None
+    ) -> list[PdfFolderModel]:
+        with get_db() as db:
+            arr = []
+
+            stmt = db.query(PdfFolder). \
+                    filter_by(user_id=user_id). \
+                    order_by(PdfFolder.updated_at.desc())
+
+            for i in stmt.all():
                 arr.append(PdfFolderModel.model_validate(i))
             return arr
 
