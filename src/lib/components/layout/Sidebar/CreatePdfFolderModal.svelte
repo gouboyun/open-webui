@@ -10,6 +10,7 @@
 	const dispatch = createEventDispatcher();
 
 	export let show = false;
+	export let rootId = '';
 
 	let loading = false;
 
@@ -30,7 +31,7 @@
 		};
 
 		loading = true;
-		const res = await createPdfFolder(localStorage.token, _folder.name).catch((error) => {
+		const res = await createPdfFolder(localStorage.token, _folder.name,rootId).catch((error) => {
 			toast.error(error);
 		});
 

@@ -1,6 +1,6 @@
 import { WEBUI_API_BASE_URL } from '$lib/constants';
 
-export const createPdfFolder = async (token: string, name: string) => {
+export const createPdfFolder = async (token: string, name: string,parent_id:string) => {
 	let error = null;
 
 	const res = await fetch(`${WEBUI_API_BASE_URL}/pdffolder/create`, {
@@ -11,7 +11,8 @@ export const createPdfFolder = async (token: string, name: string) => {
 			authorization: `Bearer ${token}`
 		},
 		body: JSON.stringify({
-			name
+			name,
+			parent_id
 		})
 	})
 		.then(async (res) => {
@@ -71,9 +72,8 @@ export const addFileToPdfById = async (token: string, id: string|null, fileId: s
 };
 
 
-export const removePdfFileById = async (token: string, id: string|null, fileId: string) => {
+export const removePdfFileById = async (token: string, id: string|null) => {
 	let error = null;
-
 	const res = await fetch(`${WEBUI_API_BASE_URL}/pdffolder/${id}/file/remove`, {
 		method: 'POST',
 		headers: {
@@ -82,7 +82,7 @@ export const removePdfFileById = async (token: string, id: string|null, fileId: 
 			authorization: `Bearer ${token}`
 		},
 		body: JSON.stringify({
-			file_id: fileId
+			file_id:''
 		})
 	})
 		.then(async (res) => {
@@ -140,10 +140,10 @@ export const removePdfFolderById = async (token: string, id: string|null) => {
 	return res;
 };
 
-export const getPdfList = async (token: string = '') => {
+export const getPdfList = async (token: string = '',name:string='') => {
 	let error = null;
 
-	const res = await fetch(`${WEBUI_API_BASE_URL}/pdffolder/list`, {
+	const res = await fetch(`${WEBUI_API_BASE_URL}/pdffolder/list?q=${name}`, {
 		method: 'GET',
 		headers: {
 			Accept: 'application/json',

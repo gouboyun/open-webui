@@ -26,7 +26,7 @@
 	const dispatch = createEventDispatcher();
 
 	const deleteFileById = async (fileId) => {
-		const res = await removePdfFileById(localStorage.token, folder?.id, fileId).catch((e) => {
+		const res = await removePdfFileById(localStorage.token,fileId).catch((e) => {
 			toast.error(e);
 			return null;
 		});
@@ -176,7 +176,7 @@
 </DeleteConfirmDialog>
 
 <div class=" w-full">
-	{#if folder.name !== '-'}
+	{#if !folder.filename}
 		<div class="  border-b py-1">
 			<button
 			class="px-4 py-2 hover:bg-gray-100 w-full flex items-center mt-1 cursor-pointer group"
@@ -241,15 +241,15 @@
 			</button>
 		</button>
 		{#if open}
-			{#each folder.files as node}
+			{#each (folder.children?folder.children:[]) as node}
 				<div class=" px-4">
 					<FileItem
 						className="w-full mt-2"
 						item={node}
 						url={node?.url ? node.url : null}
-						name={node.meta.name}
-						type={node.meta.content_type}
-						size={node?.meta.size}
+						name={node.filename}
+						type={''}
+						size={0}
 						dismissible={true}
 						on:dismiss={() => {
 							deleteFileById(node.id);
@@ -263,24 +263,22 @@
 		{/if}
 		</div>
 	{:else}
-		{#each folder.files as node}
 			<div class=" px-4">
 				<FileItem
 					className="w-full mt-2"
-					item={node}
-					url={node?.url ? node.url : null}
-					name={node.meta.name}
-					type={node.meta.content_type}
-					size={node?.meta.size}
+					item={folder}
+					url={folder?.url ? folder.url : null}
+					name={folder.filename}
+					type={''}
+					size={0}
 					dismissible={true}
 					on:dismiss={() => {
-						deleteFileById(node.id);
+						deleteFileById(folder.id);
 					}}
 					on:click={() => {
-						console.log(node);
+						console.log(folder.file);
 					}}
 				/>
 			</div>
-		{/each}
 	{/if}
 </div>

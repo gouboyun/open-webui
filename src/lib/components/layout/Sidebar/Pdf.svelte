@@ -19,27 +19,21 @@
 	let showCreateFolderConfirm = false;
 	let search = '';
 	let searchDebounceTimeout;
+	let rootId = '';
 
 	const searchDebounceHandler = async () => {
-
 		if (searchDebounceTimeout) {
 			clearTimeout(searchDebounceTimeout);
 		}
 
-		if (search === '') {
-			//await initChatList();
-			return;
-		} else {
+		// if (search === '') {
+		// 	//await initChatList();
+		// 	return;
+		// } else {
 			searchDebounceTimeout = setTimeout(async () => {
-				//allChatsLoaded = false;
-				//currentChatPage.set(1);
-				// await chats.set(await getChatListBySearchText(localStorage.token, search));
-
-				// if ($chats.length === 0) {
-				// 	tags.set(await getAllTags(localStorage.token));
-				// }
+				getFiles();
 			}, 1000);
-		}
+		//}
 	};
 
 	const uploadFileHandler = async (file, fullContext: boolean = false) => {
@@ -105,8 +99,9 @@
 
 	const getFiles = async () => {
 		try {
-			const res = await getPdfList(localStorage.token);
-			pdfFolders = res;
+			const res = await getPdfList(localStorage.token,search);
+			pdfFolders = res.children?res.children:[];
+			rootId = res.id;
 		} catch (e) {
 			pdfFolders = [];
 		}
@@ -147,7 +142,7 @@
 	});
 </script>
 
-<CreatePdfFolderModal show={showCreateFolderConfirm} on:save={getFiles} />
+<CreatePdfFolderModal {rootId} show={showCreateFolderConfirm} on:save={getFiles} />
 
 <div class="relative">
 	<input
@@ -204,6 +199,8 @@
 	</div>
 
 	{#each pdfFolders as folder, fileIdx}
+		{#if folder.name !== '-'}
 		<PdfFolder {folder} on:change={getFiles} />
+		{/if}
 	{/each}
 </div>
