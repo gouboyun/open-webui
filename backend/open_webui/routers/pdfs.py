@@ -7,7 +7,6 @@ from open_webui.models.pdfs import (
     Pdfs,
     PdfFolderForm,
     PdfFolderResponse,
-    PdfFolderUserResponse,
 )
 
 from open_webui.models.files import Files, FileModel
@@ -32,7 +31,7 @@ router = APIRouter()
 
 
 def must_build_root_folder(
-    id:str,
+    id: str,
     user=Depends(get_verified_user)):
     '''
     if id is null, use user id as folder id
@@ -43,96 +42,78 @@ def must_build_root_folder(
     if not m and id == user.id:
         # 用当前用户 id 作为 folder_id 单独创建一个 folder
         m = Pdfs.insert_special_folder(user.id, PdfFolderForm(name='-', description="empty"))
+
     return id, m
 
 
-@router.get("/", response_model=list[PdfFolderUserResponse])
+@router.get("/", response_model=PdfFolderResponse)
 async def get_pdffolder(
-    q: Optional[str] = None,
-    user=Depends(get_verified_user)):
-    arr1 = Pdfs.get_folders_by_user_id(user.id, q)
+        user = Depends(get_verified_user),
+        q: Optional[str] = None,
+    ):
+    # 
+    id, root = must_build_root_folder('null', user)
 
+    arr1 = Pdfs.get_folders_by_user_id(user.id, q)
     arr = []
     for item in arr1:
-        files = []
-        if item.data:
-            
-            # read real file info from db and disk
-            files = Files.get_file_metadatas_by_ids(
-                item.data.get("file_ids", [])
+        try:
+            arr.append(
+                PdfFolderResponse.model_validate({**item.model_dump()})
             )
+        except Exception:
+            log.error("get_pdffolder () failed")
 
-            # Check if all files exist
-            if len(files) != len(item.data.get("file_ids", [])):
-                missing_files = list(
-                    set(item.data.get("file_ids", []))
-                    - set([file.id for file in files])
-                )
-                if missing_files:
-                    data = item.data or {}
-                    file_ids = data.get("file_ids", [])
+    d = {}
+    root = None
 
-                    for missing_file in missing_files:
-                        file_ids.remove(missing_file)
-
-                    data["file_ids"] = file_ids
-                    Pdfs.update_folder_data_by_id(
-                        id=item.id, data=data
-                    )
-
-                    files = Files.get_file_metadatas_by_ids(file_ids)
-
-        arr.append(
-            PdfFolderUserResponse(
-                **item.model_dump(),
-                files=files,
-            )
-        )
-
-    return arr
-
-
-@router.get("/list", response_model=list[PdfFolderUserResponse])
-async def get_folder_list(user=Depends(get_verified_user),
-                          q: Optional[str] = None,
-                          ):
-    arr = Pdfs.get_folders_by_user_id(user.id)
-
-    arr1 = []
     for item in arr:
-        files = []
-        if item.data:
-            files = Files.get_file_metadatas_by_ids(
-                item.data.get("file_ids", [])
-            )
+        if not item.parent_id:
+            root = item
+        d[item.id] = item
 
-            # Check if all files exist
-            if len(files) != len(item.data.get("file_ids", [])):
-                missing_files = list(
-                    set(item.data.get("file_ids", []))
-                    - set([file.id for file in files])
-                )
-                if missing_files:
-                    data = item.data or {}
-                    file_ids = data.get("file_ids", [])
+    if q:
+        item_set = set()
+        child_q = Pdfs.search_folders_by_uid(user.id, q)
+        for item in child_q:
+            item_set.add(item.id)
+            v = d[item.id]
+            while v.parent_id:
+                v = d[v.parent_id]
+                item_set.add(v.id)
 
-                    for missing_file in missing_files:
-                        file_ids.remove(missing_file)
+        for item in arr:
+            if item == root:
+                continue
+            if item.parent_id and item.id in item_set:
+                v = d[item.parent_id]
+                if not v.children:
+                    v.children = []
+                v.children.append(item)
 
-                    data["file_ids"] = file_ids
-                    Pdfs.update_folder_data_by_id(
-                        id=item.id, data=data
-                    )
+    else:
+        for item in arr:
+            if item == root:
+                continue
+            if item.parent_id:
+                v = d[item.parent_id]
+                if not v.children:
+                    v.children = []
+                v.children.append(item)
 
-                    files = Files.get_file_metadatas_by_ids(file_ids)
+    if not root:
+        id, m = must_build_root_folder('null', user)
+        return PdfFolderResponse.model_validate({**m.model_dump()})
+    return root
 
-        arr1.append(
-            PdfFolderUserResponse(
-                **item.model_dump(),
-                files=files,
-            )
-        )
-    return arr1
+
+
+@router.get("/list", response_model=PdfFolderResponse)
+async def get_folder_list(
+        user = Depends(get_verified_user),
+        q: Optional[str] = None,
+    ):
+    return await get_pdffolder(user, q)
 
 
 ############################
@@ -155,12 +136,7 @@ async def create_new_pdffolder(
         )
 
 
-
-class PdfFilesResponse(PdfFolderResponse):
-    files: list[FileModel]
-
-
-@router.get("/{id}", response_model=Optional[PdfFilesResponse])
+@router.get("/{id}", response_model=Optional[PdfFolderResponse])
 async def get_pdffolder_by_id(id: str, user=Depends(get_verified_user)):
     id, m = must_build_root_folder(id, user)
 
@@ -168,7 +144,7 @@ async def get_pdffolder_by_id(id: str, user=Depends(get_verified_user)):
         file_ids = m.data.get("file_ids", []) if m.data else []
         files = Files.get_files_by_ids(file_ids)
 
-        return PdfFilesResponse(
+        return PdfFolderResponse(
             **m.model_dump(),
             files=files,
         )
@@ -179,7 +155,7 @@ async def get_pdffolder_by_id(id: str, user=Depends(get_verified_user)):
         )
 
 
-@router.post("/{id}/update", response_model=Optional[PdfFilesResponse])
+@router.post("/{id}/update", response_model=Optional[PdfFolderResponse])
 async def update_fodler_by_id(
     id: str,
     form_data: PdfFolderForm,
@@ -203,7 +179,7 @@ async def update_fodler_by_id(
         file_ids = m.data.get("file_ids", []) if m.data else []
         files = Files.get_files_by_ids(file_ids)
 
-        return PdfFilesResponse(
+        return PdfFolderResponse(
             **m.model_dump(),
             files=files,
         )
@@ -218,13 +194,13 @@ class PdfFolderFileIdForm(BaseModel):
     file_id: str
 
 
-@router.post("/{id}/file/add", response_model=Optional[PdfFilesResponse])
+@router.post("/{id}/file/add", response_model=Optional[PdfFolderResponse])
 def add_file_to_folder_by_id(
     request: Request,
     id: str,
     form_data: PdfFolderFileIdForm,
     user=Depends(get_verified_user),
-):
+):    
     id, m = must_build_root_folder(id, user)
     if not m:
         raise HTTPException(
@@ -256,7 +232,6 @@ def add_file_to_folder_by_id(
             request, ProcessFileForm(file_id=form_data.file_id, collection_name=id)
         )
     except Exception as e:
-        log.debug(e)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
@@ -269,9 +244,9 @@ def add_file_to_folder_by_id(
         if m:
             # files = Files.get_files_by_ids(file_ids)
 
-            return PdfFilesResponse(
+            return PdfFolderResponse(
                 **m.model_dump(),
-                files=files,
+                # files=files,
             )
         else:
             raise HTTPException(
@@ -285,7 +260,7 @@ def add_file_to_folder_by_id(
         )
 
 
-@router.post("/{id}/file/update", response_model=Optional[PdfFilesResponse])
+@router.post("/{id}/file/update", response_model=Optional[PdfFolderResponse])
 def update_file_from_folder_by_id(
     request: Request,
     id: str,
@@ -334,7 +309,7 @@ def update_file_from_folder_by_id(
 
         files = Files.get_files_by_ids(file_ids)
 
-        return PdfFilesResponse(
+        return PdfFolderResponse(
             **m.model_dump(),
             files=files,
         )
@@ -345,7 +320,7 @@ def update_file_from_folder_by_id(
         )
 
 
-@router.post("/{id}/file/remove", response_model=Optional[PdfFilesResponse])
+@router.post("/{id}/file/remove", response_model=Optional[PdfFolderResponse])
 def remove_file_from_folder_by_id(
     id: str,
     form_data: PdfFolderFileIdForm,
@@ -365,54 +340,11 @@ def remove_file_from_folder_by_id(
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
         )
 
-    file = Files.get_file_by_id(form_data.file_id)
-    if not file:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ERROR_MESSAGES.NOT_FOUND,
-        )
-
-    # Remove content from the vector database
-    try:
-        VECTOR_DB_CLIENT.delete(
-            collection_name=m.id, filter={"file_id": form_data.file_id}
-        )
-    except Exception as e:
-        log.debug("remove from vector db failed")
-        pass
-
-    if m:
-        data = m.data or {}
-        file_ids = data.get("file_ids", [])
-
-        if form_data.file_id in file_ids:
-            file_ids.remove(form_data.file_id)
-            data["file_ids"] = file_ids
-
-            m = Pdfs.update_folder_data_by_id(id=id, data=data)
-
-            if m:
-                files = Files.get_files_by_ids(file_ids)
-
-                return PdfFilesResponse(
-                    **m.model_dump(),
-                    files=files,
-                )
-            else:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=ERROR_MESSAGES.DEFAULT("folder"),
-                )
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=ERROR_MESSAGES.DEFAULT("file_id"),
-            )
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ERROR_MESSAGES.NOT_FOUND,
-        )
+    Pdfs.delete_folder_by_id(id)
+    
+    id = "null"
+    id, m = must_build_root_folder(id, user)
+    return PdfFolderResponse.model_validate({**m.model_dump()})
 
 
 @router.delete("/{id}/delete", response_model=bool)
@@ -465,7 +397,7 @@ async def reset_folder_by_id(id: str, user=Depends(get_verified_user)):
     return m
 
 
-@router.post("/{id}/files/batch/add", response_model=Optional[PdfFilesResponse])
+@router.post("/{id}/files/batch/add", response_model=Optional[PdfFolderResponse])
 def add_files_to_folder_batch(
     request: Request,
     id: str,
@@ -529,7 +461,7 @@ def add_files_to_folder_batch(
     # If there were any errors, include them in the response
     if result.errors:
         error_details = [f"{err.file_id}: {err.error}" for err in result.errors]
-        return PdfFilesResponse(
+        return PdfFolderResponse(
             **m.model_dump(),
             files=Files.get_files_by_ids(existing_file_ids),
             warnings={
@@ -538,7 +470,7 @@ def add_files_to_folder_batch(
             },
         )
 
-    return PdfFilesResponse(
+    return PdfFolderResponse(
         **m.model_dump(), files=Files.get_files_by_ids(existing_file_ids)
     )
 

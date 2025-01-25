@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import time
 import uuid
@@ -46,31 +48,21 @@ class PdfFolderModel(BaseModel):
     parent_id: Optional[str] = None
     user_id: str
 
-    name: Optional[str]
-    file_id: Optional[str]
-    filename: Optional[str]
-    file: Optional[FileModel] = None
+    name: Optional[str] = None
+    file_id: Optional[str] = None
+    filename: Optional[str] = None
 
     created_at: int  # timestamp in epoch
     updated_at: int  # timestamp in epoch
 
 
-class PdfFolderUserModel(PdfFolderModel):
-    user: Optional[UserResponse] = None
-
-
 class PdfFolderResponse(PdfFolderModel):
-    files: Optional[list[FileMetadataResponse | dict]] = None
-
-
-class PdfFolderUserResponse(PdfFolderUserModel):
-    files: Optional[list[FileMetadataResponse | dict]] = None
+    children: Optional[list[PdfFolderResponse]] = None
 
 
 class PdfFolderForm(BaseModel):
     name: str
     parent_id: Optional[str] = None
-    data: Optional[dict] = None
 
 
 class PdfFolderTable:
@@ -91,12 +83,13 @@ class PdfFolderTable:
             )
 
             try:
-                result = PdfFolder(**m.model_dump())
-                db.add(result)
+                t = PdfFolder(**m.model_dump())
+
+                db.add(t)
                 db.commit()
-                db.refresh(result)
-                if result:
-                    return PdfFolderModel.model_validate(result)
+                db.refresh(t)
+                if t:
+                    return PdfFolderModel.model_validate(t)
                 else:
                     return None
             except Exception:
@@ -129,9 +122,9 @@ class PdfFolderTable:
             except Exception:
                 return None
 
-    def get_folders_by_user_id(
-        self, user_id: str, q: Optional[str] = None
-    ) -> list[PdfFolderUserModel]:
+    def search_folders_by_uid(self,
+        user_id: str, q: Optional[str] = None
+    ) -> list[PdfFolderModel]:
         with get_db() as db:
             arr = []
 
@@ -141,42 +134,38 @@ class PdfFolderTable:
             if q:
                 q = q.lower()
                 stmt = db.query(PdfFolder).filter(
-                    or_([
+                    or_(
                         PdfFolder.name.like(f'%{q}%'),
                         PdfFolder.filename.like(f'%{q}%'),
-                        ]),
+                        ),
                     PdfFolder.user_id == user_id,
                     ).order_by(PdfFolder.updated_at.desc())
-
             for i in stmt.all():
-                user = Users.get_user_by_id(i.user_id)
-                arr.append(
-                    PdfFolderUserModel.model_validate(
-                        {
-                            **PdfFolderModel.model_validate(i).model_dump(),
-                            "user": user.model_dump() if user else None,
-                        },
-                    )
-                )
+                # f = Files.get_file_by_id(i.file_id) if i.file_id else None
+                arr.append(PdfFolderModel.model_validate(i))
             return arr
 
-    def get_folder_by_id(self, id: str) -> Optional[list[PdfFolderModel]]:
+    def get_folders_by_user_id(
+        self, user_id: str, q: Optional[str] = None
+    ) -> list[PdfFolderModel]:
+        with get_db() as db:
+            arr = []
+
+            stmt = db.query(PdfFolder). \
+                    filter_by(user_id=user_id). \
+                    order_by(PdfFolder.updated_at.desc())
+
+            for i in stmt.all():
+                arr.append(PdfFolderModel.model_validate(i))
+            return arr
+
+    def get_folder_by_id(self, id: str) -> Optional[PdfFolderModel]:
         try:
-            resp = []
             with get_db() as db:
-                arr = db.query(PdfFolder).\
-                    filter(or_(
-                        PdfFolder.id == id,
-                        PdfFolder.file_id == id,
-                        )).all()
-                for i in arr:
-                    if i.file_id:
-                        f = Files.get_file_by_id(i.file_id)
-                    resp.append({
-                        **PdfFolderModel.model_validate(i), 
-                        "file": f if f else None,
-                    })
-                        
+                mm = db.query(PdfFolder).filter(PdfFolder.id == id).first()
+                p = PdfFolderModel.model_validate(mm)
+                return p
+
         except Exception:
             return None
 
@@ -189,11 +178,16 @@ class PdfFolderTable:
                 if not m1:
                     raise Exception("folder not found")
                 
+                newid = str(uuid.uuid4())
                 p = PdfFolder(
-                    id = str(uuid),
+                    id = newid,
                     parent_id = id,
-                    file_id = file_id, 
+                    user_id = m1.user_id,
+                    name = f"file-{newid}",
+                    file_id = file_id,
                     filename = filename,
+                    created_at= int(time.time()),
+                    updated_at= int(time.time()),
                     )
                 db.add(p)
                 db.commit()
@@ -205,6 +199,17 @@ class PdfFolderTable:
     def delete_folder_by_id(self, id: str) -> bool:
         try:
             with get_db() as db:
+                def drop_child_folder(id):
+                    children = db.query(PdfFolder).filter(PdfFolder.parent_id == id).all()
+                    for child in children:
+                        drop_child_folder(child.id)
+                        if child.file_id:
+                            Files.delete_file_by_id(child.file_id)
+                    db.query(PdfFolder).filter_by(id=id).delete()
+                    db.commit()
+
+                drop_child_folder(id)
+
                 db.query(PdfFolder).filter(PdfFolder.parent_id == id).delete()
                 db.query(PdfFolder).filter_by(id=id).delete()
                 db.commit()
